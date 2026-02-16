@@ -28,3 +28,14 @@ Learnings
         - zip [5,3,2,6,2,7,2,5,4,6,6] ["im","a","turtle"]  == [(5,"im"),(3,"a"),(2,"turtle")]
 - all together now, finding right angle triangle with lengths < 10 and perimeter 24
     - [ (a,b,c) | c <- [1..10], b <- [1..c], a <- [1..b], a^2 + b^2 == c^2, a+b+c == 24] 
+- if condition then (true value) else (false value) ... must always have an else
+- local definitions: let...in, where
+```
+circleArea r = pi * square r
+    where pi = 3.1415926
+          square x = x * x
+
+circleArea r = let pi = 3.1415926
+                   square x = x * x
+               in pi * square r
+```
