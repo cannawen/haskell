@@ -9,8 +9,11 @@ main = do
     let parsedInstructions = zip directions numbers
 
     let answer = foldl 
-            (\acc (dir, num) -> if dir == 'R' then acc + num else acc - num) 
-            0 
+            (\(current, zeroCount) (dir, num) -> 
+                if dir == 'R' 
+                    then (current + num, zeroCount) 
+                    else (current - num, zeroCount)) 
+            (0, 0) 
             parsedInstructions
 
     print answer
