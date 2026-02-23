@@ -6,7 +6,7 @@ main = do
     let directions = map (\instruction -> instruction !! 0) instructionStrings
     let numbers = map read (map tail instructionStrings) :: [Int]
 
-    let parsedInstruction = zip directions numbers
+    let parsedInstructions = zip directions numbers
 
-    print (take 5 parsedInstruction)
+    print (foldl (\acc (dir, num) -> acc + num) 0 parsedInstructions)
 
