@@ -1,6 +1,6 @@
 main :: IO ()
 main = do
-    contents <- readFile "app/aoc/2025/1/input-mini.txt"
+    contents <- readFile "app/aoc/2025/1/input.txt"
     let instructionStrings = lines contents
 
     let directions = map (\instruction -> instruction !! 0) instructionStrings
@@ -11,8 +11,8 @@ main = do
 
     let answer = foldl 
             (\(current, zeroCount) num -> (rem (current + num) 100, if rem (current + num) 100 == 0 then zeroCount + 1 else zeroCount)) 
-            (0, 0) 
+            (50, 0) 
             numbers
 
-    print (snd answer + 1)
+    print (snd answer)
 
