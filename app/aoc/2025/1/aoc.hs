@@ -7,14 +7,12 @@ main = do
     let numbers = map read (map tail instructionStrings) :: [Int]
 
     let parsedInstructions = zip directions numbers
+    let numbers = map (\(dir, num) -> if dir == 'R' then num else - num) parsedInstructions
 
     let answer = foldl 
-            (\(current, zeroCount) (dir, num) -> 
-                if dir == 'R' 
-                    then (current + num, zeroCount) 
-                    else (current - num, zeroCount)) 
+            (\(current, zeroCount) num -> (current + num, zeroCount)) 
             (0, 0) 
-            parsedInstructions
+            numbers
 
     print answer
 
