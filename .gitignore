@@ -1,0 +1,17 @@
+dist-newstyle/
+.ghc.environment.*
+*.hi
+*.o
+*.chi
+*.chs.h
+*.dyn_hi
+*.dyn_o
+.hpc
+.HTF/
+.ghcid
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.idea/
+*.swp
+*~
