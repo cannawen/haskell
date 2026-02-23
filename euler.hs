@@ -13,19 +13,15 @@ two = do
     print (sum [fib x | x <- [1..], fib x < 4000000, fib x `mod` 2 == 0])
 
 
--- isPrime n = divisorOf 2
---   where
---     divisorOf d
---       | d*d > n        = True
---       | n `rem` d == 0 = False
---       | otherwise      = divisorOf (d+1)
+isPrime_simple n = hasDivisorsMoreThan 2
+    where
+        hasDivisorsMoreThan d
+            | d*d > n        = True
+            | n `rem` d == 0 = False
+            | otherwise      = hasDivisorsMoreThan (d+1)
 
-divisorOf n d
-    | d*d > n        = True
-    | n `rem` d == 0 = False
-    | otherwise      = divisorOf n (d+1)
-
-isPrime n = divisorOf n 2
+isPrime :: Integer -> Bool
+isPrime n = null [x | x <- [2..(ceiling.sqrt.fromIntegral) n], n `rem` x == 0]
 
 primes = filter isPrime [2 .. ]
 
@@ -41,4 +37,4 @@ seven = do
     print (primes !! 10000)
 
 
-main = seven
+main = three
