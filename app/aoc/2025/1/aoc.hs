@@ -8,5 +8,10 @@ main = do
 
     let parsedInstructions = zip directions numbers
 
-    print (foldl (\acc (dir, num) -> acc + num) 0 parsedInstructions)
+    let answer = foldl 
+            (\acc (dir, num) -> acc + num) 
+            0 
+            parsedInstructions
+
+    print answer
 
