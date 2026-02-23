@@ -20,7 +20,6 @@ isPrime_simple n = hasDivisorsMoreThan 2
             | n `rem` d == 0 = False
             | otherwise      = hasDivisorsMoreThan (d+1)
 
-isPrime :: Integer -> Bool
 isPrime n = null [x | x <- [2..(ceiling.sqrt.fromIntegral) n], n `rem` x == 0]
 
 primes = filter isPrime [2 .. ]
