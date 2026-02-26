@@ -1,5 +1,6 @@
 main :: IO ()
 main = do
+--     https://adventofcode.com/2025/day/1
     contents <- readFile "app/aoc/2025/1/input.txt"
     let instructionStrings = lines contents
 
