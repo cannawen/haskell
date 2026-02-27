@@ -1,4 +1,4 @@
-module Euler where
+module Euler (main, one, two, three, seven, fib, isPrime, primes, primeFactors) where
 
 fib 0 = 0
 fib 1 = 1
