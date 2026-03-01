@@ -8,8 +8,8 @@ parse = map f . lines
 
 part1 = length . filter (== 0) . scanl (\current num -> rem (current + num) 100) 50
 
-expandOnes = concatMap (\n -> replicate (abs n) (signum n))
 part2 numbers = part1 (expandOnes numbers)
+  where expandOnes = concatMap (\n -> replicate (abs n) (signum n))
 
 main :: IO ()
 main = do
