@@ -14,11 +14,14 @@ part1 input = input
   & map read
   & sum
 
+part2 input = input
+
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
 main = do
     contents <- readFile "app/aoc/2025/2/input.txt"
-    let numbers = parse contents
-    print numbers
 
-    print (part1 numbers)
+    let parsedContent = parse contents
+
+    print (part1 parsedContent)
+    print (part2 parsedContent)
