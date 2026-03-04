@@ -13,7 +13,6 @@ part1 input = input -- array of "123123"
   & map read -- 1234
   & sum
 
-hasRepeatingDigits :: [Char] -> Bool
 hasRepeatingDigits string = -- "foobar"
   let stringLength = length string -- 6
       possibleSubstrLengths = [x | x<- [1..stringLength `div` 2], mod stringLength x == 0] -- [1, 2, 3]
@@ -21,6 +20,12 @@ hasRepeatingDigits string = -- "foobar"
       possibleSubstringRepeated = map (take stringLength . cycle) possibleSubstrings -- ["ffffff", "fofofo", "foofoo"]
   in
     elem string possibleSubstringRepeated
+
+hasRepeatingDigits' string = any repeatsFor validChunkSize
+  where 
+    n = length string
+    validChunkSize = [x | x <- [1 .. div n 2], mod n x == 0]
+    repeatsFor x = take n (cycle (take x string)) == string
 
 part2 input = input
   & filter hasRepeatingDigits
