@@ -17,7 +17,7 @@ part1 input = input
 hasRepeatingDigits :: [Char] -> Bool
 hasRepeatingDigits string = -- "foobar"
   let stringLength = length string -- 6
-      possibleSubstrLengths = [1..stringLength `div` 2] -- [1, 2, 3]
+      possibleSubstrLengths = [x | x<- [1..stringLength `div` 2], mod stringLength x == 0] -- [1, 2, 3]
       possibleSubstrings = map (\length -> fst $ splitAt length string) possibleSubstrLengths -- ["f", "fo", "foo"]
       possibleSubstringRepeated = map (\str -> take stringLength (cycle str)) possibleSubstrings -- ["ffffff", "fofofo", "foofoo"]
   in 
