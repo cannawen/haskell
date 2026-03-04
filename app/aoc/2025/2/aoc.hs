@@ -21,11 +21,12 @@ hasRepeatingDigits string = -- "foobar"
   in
     elem string possibleSubstringRepeated
 
-hasRepeatingDigits' string = any repeatsFor validChunkSize
+hasRepeatingDigits' string = -- "1234512345"
+  any (\chunkSize -> repeatsFirst chunkSize == string) validChunkSize
   where 
-    n = length string
-    validChunkSize = [x | x <- [1 .. div n 2], mod n x == 0]
-    repeatsFor x = take n (cycle (take x string)) == string
+    n = length string -- 10
+    validChunkSize = [x | x <- [1 .. div n 2], mod n x == 0] -- [1, 2, 5]
+    repeatsFirst x = take n (cycle (take x string)) -- ["1111111111", "1212121212", "1234512345"]
 
 part2 input = input
   & filter hasRepeatingDigits
