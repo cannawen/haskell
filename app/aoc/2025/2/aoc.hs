@@ -17,7 +17,7 @@ part1 input = input
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
 main = do
-    contents <- readFile "app/aoc/2025/2/input-mini.txt"
+    contents <- readFile "app/aoc/2025/2/input.txt"
     let numbers = parse contents
     print numbers
 
