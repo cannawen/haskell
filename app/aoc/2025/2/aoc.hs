@@ -14,13 +14,23 @@ part1 input = input
   & map read
   & sum
 
+hasRepeatingDigits :: [Char] -> Bool
+hasRepeatingDigits string = -- "foobar"
+  let stringLength = length string -- 6
+      possibleSubstrLengths = [1..stringLength `div` 2] -- [1, 2, 3]
+      possibleSubstrings = map (\length -> fst $ splitAt length string) possibleSubstrLengths -- ["f", "fo", "foo"]
+      possibleSubstringRepeated = map (\str -> take stringLength (cycle str)) possibleSubstrings -- ["ffffff", "fofofo", "foofoo"]
+  in 
+    elem string possibleSubstringRepeated
+
+
 part2 input = input
   & concatMap (\[from, to] -> [from..to])
   & map show
   & filter hasRepeatingDigits
   & map read
   & sum
-  where hasRepeatingDigits = (\string -> False)
+
 
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
@@ -28,6 +38,7 @@ main = do
     contents <- readFile "app/aoc/2025/2/input.txt"
 
     let parsedContent = parse contents
+    print parsedContent
 
     print (part1 parsedContent)
     print (part2 parsedContent)
