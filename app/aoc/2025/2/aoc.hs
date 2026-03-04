@@ -3,10 +3,8 @@ import Data.List.Split (splitOn)
 parse :: [Char] -> [[Int]]
 parse input = map (map read . splitOn "-") (splitOn "," input)
 
-part1 = length . filter (== 0) . scanl (\current num -> rem (current + num) 100) 50
-
-part2 numbers = part1 (expandOnes numbers)
-  where expandOnes = concatMap (\n -> replicate (abs n) (signum n))
+part1 :: [[Int]] -> [[Int]]
+part1 input = map (\pair -> [(pair !! 0)..(pair !! 1)]) input
 
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
@@ -15,5 +13,4 @@ main = do
     let numbers = parse contents
     print numbers
 
-    -- print (part1 numbers)
-    -- print (part2 numbers)
+    print (part1 numbers)
