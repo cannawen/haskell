@@ -1,13 +1,11 @@
 import Data.List.Split (splitOn)
 import Data.Function ((&))
 
-parse :: [Char] -> [[Int]]
-parse input = map (map read . splitOn "-") (splitOn "," input)
-
-part1 :: [[Int]] -> Int
-part1 input = input
+parse input = map (map (read :: String->Int) . splitOn "-") (splitOn "," input)
   & concatMap (\[from, to] -> [from..to])
   & map show
+
+part1 input = input
   & map (\numberString -> splitAt (length numberString `div` 2) numberString)
   & filter (\(firstHalf, lastHalf) -> firstHalf == lastHalf)
   & map (\(halfNum, _) -> halfNum ++ halfNum)
@@ -25,8 +23,6 @@ hasRepeatingDigits string = -- "foobar"
 
 
 part2 input = input
-  & concatMap (\[from, to] -> [from..to])
-  & map show
   & filter hasRepeatingDigits
   & map read
   & sum
@@ -38,7 +34,6 @@ main = do
     contents <- readFile "app/aoc/2025/2/input.txt"
 
     let parsedContent = parse contents
-    print parsedContent
 
     print (part1 parsedContent)
     print (part2 parsedContent)
