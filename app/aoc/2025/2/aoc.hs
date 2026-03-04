@@ -1,15 +1,16 @@
 import Data.List.Split (splitOn)
 import Data.Function ((&))
 
-parse input = map (map (read :: String->Int) . splitOn "-") (splitOn "," input)
-  & concatMap (\[from, to] -> [from..to])
-  & map show
+parse input = splitOn "," input -- "1-2,3-5"
+  & map (map (read :: String->Int) . splitOn "-") -- [[1-2], [3-5]]
+  & concatMap (\[from, to] -> [from..to]) -- [1, 2, 3, 4, 5]
+  & map show -- ["1", "2", "3", "4", "5"]
 
-part1 input = input
-  & map (\numberString -> splitAt (length numberString `div` 2) numberString)
-  & filter (\(firstHalf, lastHalf) -> firstHalf == lastHalf)
-  & map (\(halfNum, _) -> halfNum ++ halfNum)
-  & map read
+part1 input = input -- array of "123123"
+  & map (\numberString -> splitAt (length numberString `div` 2) numberString) -- ["123", "123"]
+  & filter (\(firstHalf, lastHalf) -> firstHalf == lastHalf) -- "123" == "123" ?
+  & map (\(halfNum, _) -> halfNum ++ halfNum) -- "123123"
+  & map read -- 1234
   & sum
 
 hasRepeatingDigits :: [Char] -> Bool
@@ -21,12 +22,10 @@ hasRepeatingDigits string = -- "foobar"
   in
     elem string possibleSubstringRepeated
 
-
 part2 input = input
   & filter hasRepeatingDigits
   & map read
   & sum
-
 
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
