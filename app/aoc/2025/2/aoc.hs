@@ -15,6 +15,12 @@ part1 input = input
   & sum
 
 part2 input = input
+  & concatMap (\[from, to] -> [from..to])
+  & map show
+  & filter hasRepeatingDigits
+  & map read
+  & sum
+  where hasRepeatingDigits = (\string -> False)
 
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
