@@ -4,7 +4,8 @@ parse :: [Char] -> [[Int]]
 parse input = map (map read . splitOn "-") (splitOn "," input)
 
 part1 :: [[Int]] -> [String]
-part1 input = map show $ concatMap (\[from, to] -> [from..to]) input
+-- part1 = map show $ concatMap (\[from, to] -> [from..to])
+part1 input = [show n | [start, end] <- input, n <- [start..end]]
 
 --     https://adventofcode.com/2025/day/2
 main :: IO ()
