@@ -1,5 +1,6 @@
 import Data.Function ((&))
 import Data.Maybe (fromMaybe)
+import qualified Data.Set as Set
 
 parse input = lines input
 
@@ -37,16 +38,16 @@ movablePaperIndicesPt2Helper input removed = foldl (\memo (x, y) ->
   let neighborIndexMatrix = [(nx,ny) | nx <- [(x-1)..(x+1)], ny <- [(y-1)..(y+1)], (nx, ny) /= (x,y)]
       neighborValues = map (\(x,y) -> getPt2 x y input removed) neighborIndexMatrix
       canRemovePaper = getPt2 x y input removed == Just '@' && (filter (== Just '@') neighborValues & length) < 4
-  in if canRemovePaper then (x, y):memo else memo) [] (matrix input)
+  in if canRemovePaper then Set.insert (x, y) memo else memo) Set.empty (matrix input)
 
-movablePaperIndicesPt2 input removed = (movablePaperIndicesPt2Helper input removed) ++ removed
+movablePaperIndicesPt2 input removed = Set.union (movablePaperIndicesPt2Helper input removed) removed
 
 recursiveThing originalGrid removedPaperIndices = 
   let newlyRemoved = (movablePaperIndicesPt2 originalGrid removedPaperIndices)
   in if newlyRemoved == removedPaperIndices then newlyRemoved else recursiveThing originalGrid newlyRemoved
 
 part2 input = 
-  recursiveThing input []
+  recursiveThing input Set.empty
   & length
   & show
         -- removePaper = foldl (\memo (x,y) -> if elem (x,y) movablePaperIndices then set x y else longInput) longInput matrix

@@ -24,6 +24,6 @@ executable 3
 
 executable 4
     main-is:          aoc.hs
-    build-depends:    base >=4.16 && <5,
+    build-depends:    containers ^>=0.6.7, base >=4.16 && <5,
     hs-source-dirs:   app/aoc/2025/4
     default-language: Haskell2010
