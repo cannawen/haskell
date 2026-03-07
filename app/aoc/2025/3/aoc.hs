@@ -32,12 +32,15 @@ foldFn memo newElement = (contractedArray, snd memo ++ [expandedArray !! index])
         index = findMaximum expandedArray
         contractedArray = drop (succ index) expandedArray
 
-find12Joltage' :: [Int] -> [Int]
+find12Joltage' :: [Int] -> Int
 find12Joltage' intArray = foldl foldFn (dropLast 12 intArray,[]) (reverse (take 12 (reverse intArray)))
   & snd
+  & concatMap show
+  & read
 
 part2 content = content
   & map find12Joltage'
+  & sum
 
 part1 content = content
   & map findJoltage
@@ -46,7 +49,7 @@ part1 content = content
 --     https://adventofcode.com/2025/day/3
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/3/input-mini.txt"
+  contents <- readFile "app/aoc/2025/3/input.txt"
 
   let parsedContent = parse contents
 
