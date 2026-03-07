@@ -1,9 +1,8 @@
-import Data.List.Split (splitOn)
 import Data.Function ((&))
 import Data.Char (digitToInt)
-import Data.List (elemIndex, findIndex)
-
+import Data.List (elemIndex)  
 import Data.Maybe (fromMaybe)
+
 parse input = lines input
   & map (map digitToInt)
 
@@ -12,34 +11,19 @@ findJoltage intArray = maxInt * 10 + onesDigit
         maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
         onesDigit = maximum (drop (succ maxIndex) intArray)
 
-dropElems:: Int -> Int -> [Int] -> [Int]
-dropElems first last array =
-  array
-  & drop first
-  & reverse
-  & drop last
-  & reverse
-
-dropLast last = reverse . drop last . reverse
-
-findMaximum intArray = maxIndex
-  where maxInt = maximum intArray
-        maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
-
-foldFn :: ([Int], [Int]) -> Int -> ([Int], [Int])
 foldFn memo newElement = (contractedArray, snd memo ++ [expandedArray !! index])
   where expandedArray = fst memo ++ [newElement]
-        index = findMaximum expandedArray
+        index = fromMaybe (error "") (elemIndex (maximum expandedArray) expandedArray)
         contractedArray = drop (succ index) expandedArray
 
-find12Joltage' :: [Int] -> Int
-find12Joltage' intArray = foldl foldFn (dropLast 12 intArray,[]) (reverse (take 12 (reverse intArray)))
+find12Joltage intArray = foldl foldFn (dropLast 12 intArray,[]) (reverse (take 12 (reverse intArray)))
   & snd
   & concatMap show
   & read
+  where dropLast last = reverse . drop last . reverse
 
 part2 content = content
-  & map find12Joltage'
+  & map find12Joltage
   & sum
 
 part1 content = content
