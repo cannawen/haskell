@@ -3,7 +3,14 @@ import Data.Maybe (fromMaybe)
 
 parse input = lines input
 
-part1 input = fromMaybe '?' (get (-1) 1)
+part1 :: [String] -> String
+part1 input = 
+  foldl (\memo (x, y) ->
+          let mapValue = fromMaybe '?' (get x y) 
+          in if mapValue == '@' then memo else succ memo
+        ) 0 matrix
+  & show
+  
   where rowNum = length input
         rowSize =  head input & length
         longInput = concat input
