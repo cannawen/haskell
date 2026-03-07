@@ -22,13 +22,9 @@ part1 input =
             else Just (longInput !! (y * rowSize + x))
         matrix = [(x,y) | x <- [0..pred rowSize], y <- [0..pred rowNum]]
 
+
 part2 input = 
-    foldl (\memo (x, y) ->
-          let neighborIndexMatrix = [(nx,ny) | nx <- [(x-1)..(x+1)], ny <- [(y-1)..(y+1)], (nx, ny) /= (x,y)]
-              neighborValues = map (\(x,y) -> get x y) neighborIndexMatrix
-              canFitForklift = get x y  == Just '@' && (filter (== Just '@') neighborValues & length) < 4
-          in if canFitForklift then (x, y):memo else memo
-        ) [] matrix
+  findIndices
   & length 
   & show
 
@@ -41,6 +37,12 @@ part2 input =
             else Just (longInput !! (y * rowSize + x))
         matrix = [(x,y) | x <- [0..pred rowSize], y <- [0..pred rowNum]]
 
+        findIndices = foldl (\memo (x, y) ->
+          let neighborIndexMatrix = [(nx,ny) | nx <- [(x-1)..(x+1)], ny <- [(y-1)..(y+1)], (nx, ny) /= (x,y)]
+              neighborValues = map (\(x,y) -> get x y) neighborIndexMatrix
+              canFitForklift = get x y  == Just '@' && (filter (== Just '@') neighborValues & length) < 4
+          in if canFitForklift then (x, y):memo else memo) [] matrix
+
 --     https://adventofcode.com/2025/day/4
 main :: IO ()
 main = do
@@ -48,5 +50,5 @@ main = do
 
   let parsedContent = parse contents
 
-  print (part1 parsedContent)
+  -- print (part1 parsedContent)
   print (part2 parsedContent)
