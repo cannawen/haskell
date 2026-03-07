@@ -26,12 +26,15 @@ findMaximum intArray = maxIndex
   where maxInt = maximum intArray
         maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
 
-foldFn :: ([Int], [Int]) -> Int -> ([Int], [Int]) 
-foldFn memo newElement = (drop index newArray, [newArray !! index])
-  where newArray = (fst memo) ++ [newElement]
-        index = findMaximum newArray
+foldFn :: ([Int], [Int]) -> Int -> ([Int], [Int])
+foldFn memo newElement = (contractedArray, snd memo ++ [expandedArray !! index])
+  where expandedArray = fst memo ++ [newElement]
+        index = findMaximum expandedArray
+        contractedArray = drop (succ index) expandedArray
 
-find12Joltage' intArray = foldl foldFn (intArray,[]) (reverse (take 12 (reverse intArray)))
+find12Joltage' :: [Int] -> [Int]
+find12Joltage' intArray = foldl foldFn (dropLast 12 intArray,[]) (reverse (take 12 (reverse intArray)))
+  & snd
 
 part2 content = content
   & map find12Joltage'
