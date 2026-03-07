@@ -20,37 +20,37 @@ dropElems first last array =
   & drop last
   & reverse
 
-findMaximum intArray = (maxInt, maxIndex)
+findMaximum intArray = maxIndex
   where maxInt = maximum intArray
         maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
 
 find12Joltage intArray = 
-  (fst firstDigit) * 10^11 
-  + (fst secondDigit) * 10^10
-  + (fst thirdDigit) * 10^9
-  + (fst fourthDigit) * 10^8
-  + (fst fifthDigit) * 10^7
-  + (fst sixthDigit) * 10^6
-  + (fst seventhDigit) * 10^5
-  + (fst eighthDigit) * 10^4
-  + (fst ninthDigit) * 10^3
-  + (fst tenthDigit) * 10^2
-  + (fst eleventhDigit) * 10^1
-  + (fst twelfthDigit) * 10^0
+ firstDigit * 10^11 
+  + secondDigit * 10^10
+  + thirdDigit * 10^9
+  + fourthDigit * 10^8
+  + fifthDigit * 10^7
+  + sixthDigit * 10^6
+  + seventhDigit * 10^5
+  + eighthDigit * 10^4
+  + ninthDigit * 10^3
+  + tenthDigit * 10^2
+  + eleventhDigit * 10^1
+  + twelfthDigit * 10^0
 
   where 
     firstDigit = findMaximum (dropElems 0 11 intArray)
-    secondDigit =  findMaximum (dropElems (snd firstDigit) 10 intArray)
-    thirdDigit =  findMaximum (dropElems (snd secondDigit) 9 intArray)
-    fourthDigit = findMaximum (dropElems (snd thirdDigit) 8 intArray)
-    fifthDigit    = findMaximum (dropElems (snd fourthDigit) 7 intArray)
-    sixthDigit    = findMaximum (dropElems (snd fifthDigit) 6 intArray)
-    seventhDigit  = findMaximum (dropElems (snd sixthDigit) 5 intArray)
-    eighthDigit   = findMaximum (dropElems (snd seventhDigit) 4 intArray)
-    ninthDigit    = findMaximum (dropElems (snd eighthDigit) 3 intArray)
-    tenthDigit    = findMaximum (dropElems (snd ninthDigit) 2 intArray)
-    eleventhDigit = findMaximum (dropElems (snd tenthDigit) 1 intArray)
-    twelfthDigit  = findMaximum (dropElems (snd eleventhDigit) 0 intArray)
+    secondDigit =  findMaximum (dropElems firstDigit 10 intArray)
+    thirdDigit =  findMaximum (dropElems secondDigit 9 intArray)
+    fourthDigit = findMaximum (dropElems thirdDigit 8 intArray)
+    fifthDigit    = findMaximum (dropElems fourthDigit 7 intArray)
+    sixthDigit    = findMaximum (dropElems fifthDigit 6 intArray)
+    seventhDigit  = findMaximum (dropElems sixthDigit 5 intArray)
+    eighthDigit   = findMaximum (dropElems seventhDigit 4 intArray)
+    ninthDigit    = findMaximum (dropElems eighthDigit 3 intArray)
+    tenthDigit    = findMaximum (dropElems ninthDigit 2 intArray)
+    eleventhDigit = findMaximum (dropElems tenthDigit 1 intArray)
+    twelfthDigit  = findMaximum (dropElems eleventhDigit 0 intArray)
 
 part2 content = content
   & map find12Joltage
