@@ -29,7 +29,7 @@ get x y input =
       then Nothing
       else Just (input !! y !! x)
 
--- update x y input = 
+getPt2 x y input removedPaperIndices = if elem (x, y) removedPaperIndices then Just '.' else get x y input
 
 matrix input = [(x,y) | x <- [0..pred (head input & length)], y <- [0..pred (length input)]]
 
@@ -42,8 +42,8 @@ movablePaperIndices input = foldl (\memo (x, y) ->
 
 part2 input = 
   movablePaperIndices input
-  & length
-  & show
+  -- & length
+  -- & show
         -- removePaper = foldl (\memo (x,y) -> if elem (x,y) movablePaperIndices then set x y else longInput) longInput matrix
 
 --     https://adventofcode.com/2025/day/4
