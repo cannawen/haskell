@@ -31,27 +31,28 @@ get x y input =
 
 -- update x y input = 
 
-
 matrix input = [(x,y) | x <- [0..pred (head input & length)], y <- [0..pred (length input)]]
 
 movablePaperIndices input = foldl (\memo (x, y) ->
   let neighborIndexMatrix = [(nx,ny) | nx <- [(x-1)..(x+1)], ny <- [(y-1)..(y+1)], (nx, ny) /= (x,y)]
       neighborValues = map (\(x,y) -> get x y input) neighborIndexMatrix
-      canFitForklift = get x y input  == Just '@' && (filter (== Just '@') neighborValues & length) < 4
-  in if canFitForklift then (x, y):memo else memo) [] (matrix input)
+      canRemovePaper = get x y input  == Just '@' && (filter (== Just '@') neighborValues & length) < 4
+  in if canRemovePaper then (x, y):memo else memo) [] (matrix input)
+
 
 part2 input = 
   movablePaperIndices input
-  & length 
-  & show        
+  & length
+  & show
         -- removePaper = foldl (\memo (x,y) -> if elem (x,y) movablePaperIndices then set x y else longInput) longInput matrix
 
 --     https://adventofcode.com/2025/day/4
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/4/input.txt"
+  contents <- readFile "app/aoc/2025/4/input-mini.txt"
 
   let parsedContent = parse contents
+  print parsedContent
 
   -- print (part1 parsedContent)
   print (part2 parsedContent)
