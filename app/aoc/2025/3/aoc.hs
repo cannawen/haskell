@@ -12,23 +12,48 @@ findJoltage intArray = maxInt * 10 + onesDigit
         maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
         onesDigit = maximum (drop (succ maxIndex) intArray)
 
-findLeftmostMaximum :: [Int] -> (Int, [Int])
-findLeftmostMaximum integerList = (maxInt, remainingIntegers)
-  where maxInt = maximum integerList
-        maxIndex = fromMaybe (error "") (elemIndex maxInt integerList)
-        remainingIntegers = drop (succ maxIndex) integerList
+dropElems:: Int -> Int -> [Int] -> [Int]
+dropElems first last array =
+  array
+  & drop first
+  & reverse
+  & drop last
+  & reverse
 
-dropLast n = reverse . drop n . reverse
+findMaximum intArray = (maxInt, maxIndex)
+  where maxInt = maximum intArray
+        maxIndex = fromMaybe (error "") (elemIndex maxInt intArray)
 
-findLeftmostMaximumWithDigits :: Int -> [Int] -> (Int, [Int])
-findLeftmostMaximumWithDigits 0 _ = (0, [])
-findLeftmostMaximumWithDigits n integerList = ((fst result) * (10 ^ (pred n)) , snd result)
-  where result = findLeftmostMaximum (dropLast n integerList)
+find12Joltage intArray = 
+  (fst firstDigit) * 10^11 
+  + (fst secondDigit) * 10^10
+  + (fst thirdDigit) * 10^9
+  + (fst fourthDigit) * 10^8
+  + (fst fifthDigit) * 10^7
+  + (fst sixthDigit) * 10^6
+  + (fst seventhDigit) * 10^5
+  + (fst eighthDigit) * 10^4
+  + (fst ninthDigit) * 10^3
+  + (fst tenthDigit) * 10^2
+  + (fst eleventhDigit) * 10^1
+  + (fst twelfthDigit) * 10^0
+
+  where 
+    firstDigit = findMaximum (dropElems 0 11 intArray)
+    secondDigit =  findMaximum (dropElems (snd firstDigit) 10 intArray)
+    thirdDigit =  findMaximum (dropElems (snd secondDigit) 9 intArray)
+    fourthDigit = findMaximum (dropElems (snd thirdDigit) 8 intArray)
+    fifthDigit    = findMaximum (dropElems (snd fourthDigit) 7 intArray)
+    sixthDigit    = findMaximum (dropElems (snd fifthDigit) 6 intArray)
+    seventhDigit  = findMaximum (dropElems (snd sixthDigit) 5 intArray)
+    eighthDigit   = findMaximum (dropElems (snd seventhDigit) 4 intArray)
+    ninthDigit    = findMaximum (dropElems (snd eighthDigit) 3 intArray)
+    tenthDigit    = findMaximum (dropElems (snd ninthDigit) 2 intArray)
+    eleventhDigit = findMaximum (dropElems (snd tenthDigit) 1 intArray)
+    twelfthDigit  = findMaximum (dropElems (snd eleventhDigit) 0 intArray)
 
 part2 content = content
-  & map (\intList -> ( map (\d -> findLeftmostMaximumWithDigits d intList ) (reverse [0..12])))
-  & map (map fst)
-  & map sum
+  & map find12Joltage
 
 part1 content = content
   & map findJoltage
