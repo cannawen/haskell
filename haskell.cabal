@@ -19,6 +19,11 @@ executable 2
 executable 3
     main-is:          aoc.hs
     build-depends:    base >=4.16 && <5,
-                      split
     hs-source-dirs:   app/aoc/2025/3
+    default-language: Haskell2010
+
+executable 4
+    main-is:          aoc.hs
+    build-depends:    base >=4.16 && <5,
+    hs-source-dirs:   app/aoc/2025/4
     default-language: Haskell2010
