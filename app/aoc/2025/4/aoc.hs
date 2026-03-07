@@ -1,11 +1,17 @@
 import Data.Function ((&))
+import Data.Maybe (fromMaybe)
 
 parse input = lines input
 
-part1 input = matrix
-  where rowSize = length input
-        columnSize =  head input & length
-        matrix = [(x,y) | x <- [0..pred rowSize], y <- [0..pred columnSize]]
+part1 input = fromMaybe '?' (get (-1) 1)
+  where rowNum = length input
+        rowSize =  head input & length
+        longInput = concat input
+        get x y = 
+          if x < 0 || y < 0 || x >= rowSize || y >= rowNum 
+            then Nothing 
+            else Just (longInput !! (y * rowSize + x))
+        matrix = [(x,y) | x <- [0..pred rowSize], y <- [0..pred rowNum]]
 
 part2 input = input
 
