@@ -1,5 +1,6 @@
 import Data.Function ((&))
 import Data.List (elemIndex, sort)
+import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 import Data.Tuple (swap)
@@ -12,8 +13,8 @@ parse input = (parseRanges ranges, parseFoods foods)
 
         parseRanges :: [String] -> [(Int, Int)]
         parseRanges ranges = ranges
-          & map (break (== '-'))
-          & map (\(start, end) -> (read start, read $ tail end))
+          & map (splitOn "-")
+          & map (\arr -> (read $ head arr, read $ last arr))
 
         parseFoods :: [String] -> [Int]
         parseFoods = map read
