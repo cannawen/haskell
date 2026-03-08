@@ -21,12 +21,7 @@ part1 (validRanges, food) = filter (inRange validRanges) food & length & show
           & any (\range -> food >= fst range && food <= snd range)
 
 merge :: (Int, Int) -> (Int, Int) -> [(Int, Int)]
-merge range1 range2       -- r1's start is always before or equal to r2's start
-  | e1 < s2 = [r1, r2]    -- fully outside    (...r1...)  (,,,r2,,,) 
-  | e1 == s2 = [(s1, e2)] -- touching         (...r1...)(,,,r2,,,)
-  | e2 < e1 = [r1]        -- fully inside     (...r1...(;;;r2;;;)...)
-  | s2 < e1 = [(s1, e2)]  -- partially inside (...r1...(;;;r2;;;),,,)
-  | otherwise = [r1, r2]  -- should never happen, I think?
+merge range1 range2 = if e1 < s2 then [r1, r2] else [(s1, max e1 e2)]
   where
       [r1, r2] = sort [range1, range2]
       s1 = fst r1
