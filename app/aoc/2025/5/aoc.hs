@@ -32,12 +32,11 @@ merge range1 range2 = if e1 < s2 then [r1, r2] else [(s1, max e1 e2)]
       s2 = fst r2
       e2 = snd r2
 
-part2 (ranges, _) = foldl (\memo range -> init memo ++ merge range (last memo) ) [head rangeStartToEnd] (tail rangeStartToEnd)
+part2 (ranges, _) = foldl (\memo range -> init memo ++ merge range (last memo) ) [head sortedRanges] (tail sortedRanges)
   & map (\(start, end) -> end - start + 1)
   & sum
 
-  where rangeStartToEnd = sort ranges
-        rangesEndToStart = map swap ranges & sort
+  where sortedRanges = sort ranges
 
 --     https://adventofcode.com/2025/day/5
 main :: IO ()
