@@ -32,7 +32,9 @@ merge range1 range2 = if e1 < s2 then [r1, r2] else
         s2 = fst r2
         e2 = snd r2
 
-part2 (ranges, _) = foldl (\memo range -> concatMap (\mem -> merge range mem) memo) [head rangeStartToEnd] (tail rangeStartToEnd)
+part2 (ranges, _) = foldl (\memo range -> init memo ++ merge range (last memo) ) [head rangeStartToEnd] (tail rangeStartToEnd)
+  & map (\(start, end) -> end - start + 1)
+  & sum
 
   where rangeStartToEnd = sort ranges
         rangesEndToStart = map swap ranges & sort
@@ -40,7 +42,7 @@ part2 (ranges, _) = foldl (\memo range -> concatMap (\mem -> merge range mem) me
 --     https://adventofcode.com/2025/day/5
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/5/input-mini.txt"
+  contents <- readFile "app/aoc/2025/5/input.txt"
 
   let parsedContent = parse contents
   print parsedContent
