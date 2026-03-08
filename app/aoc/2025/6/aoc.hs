@@ -2,19 +2,23 @@ import Data.Function ((&))
 import Data.List.Split (splitOn)
 import Data.List (transpose)
 
+parse :: String -> [(Int -> Int -> Int, [Int])]
 parse input = (lines input)
   & map (splitOn " ")
   & map (filter (/= ""))
   & transpose
   & map reverse
+  & map (\mathArray -> (head mathArray, tail mathArray))
+  & map (\(operator, numbers) -> (if operator == "+" then (+) else (*), map read numbers))
 
 part1 input = input
   & map calculate
   & sum
 
-  where getOperator mathArray = if head mathArray == "+" then (+) else (*)
-        getNumbers mathArray = map read (tail mathArray)
-        calculate mathArray = foldl (getOperator mathArray) (head $ getNumbers mathArray) (tail $ getNumbers mathArray)
+  where
+  -- where getOperator mathArray = if head mathArray == "+" then (+) else (*)
+  --       getNumbers mathArray = map read (tail mathArray)
+        calculate (operator, numbers) = foldl operator (head numbers) (tail numbers)
 
 part2 input = "pt2"
 
