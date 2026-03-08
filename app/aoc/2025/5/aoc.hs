@@ -7,10 +7,11 @@ parse input = (parseRanges ranges, parseFoods $ tail foods)
   where splitIndex = fromMaybe 0 (elemIndex "" (lines input))
         (ranges, foods) = splitAt splitIndex (lines input)
 
-parseRanges :: [String] -> [(Int, Int)]
+parseRanges :: [String] -> Set.Set Int
 parseRanges ranges = ranges
   & map (break (== '-'))
-  & map (\(start, end) -> (read start, read $ tail end))
+  & concatMap (\(start, end) -> [read start..read $ tail end])
+  & Set.fromList
 
 parseFoods :: [String] -> [Int]
 parseFoods foods = map read foods
@@ -25,6 +26,7 @@ main = do
   contents <- readFile "app/aoc/2025/5/input-mini.txt"
 
   let parsedContent = parse contents
+  print parsedContent
 
-  print $ part1 parsedContent
-  print $ part2 parsedContent
+  -- print $ part1 parsedContent
+  -- print $ part2 parsedContent
