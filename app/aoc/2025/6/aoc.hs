@@ -4,37 +4,35 @@ import Data.List (transpose)
 import qualified Data.Text as T
 import qualified Data.List.Split.Internals as T
 
-parse1 :: String -> [(Int -> Int -> Int, [Int])]
 parse1 input = lines input
   & map (splitOn " ")
   & map (filter (/= ""))
   & transpose
   & map reverse
   & map (\mathArray -> (head mathArray, tail mathArray))
-  & map (\(operator, numbers) -> (if operator == "+" then (+) else (*), map read numbers))
+  & map (\(operator, numbers) -> (if operator == "+" then sum else product, map read numbers))
 
 part1 input = input
   & map calculate
   & sum
 
-  where calculate (operator, numbers) = foldl1 operator numbers
+  where calculate (operator, numbers) = operator numbers
 
-parse2 :: String -> [(Char, [Int])]
 parse2 input = zip operations numbers
   where operations = filter (\c -> c == '*' || c == '+') (last $ lines input)
-        numbers = 
-          input 
-          & lines 
-          & init 
-          & transpose 
-          & map T.pack 
+        numbers =
+          input
+          & lines
+          & init
+          & transpose
+          & map T.pack
           & map T.strip
           & map T.unpack
           & splitWhen (=="")
-          & map (map read)  
+          & map (map read)
 
 part2 input = input
-  & map (\(operationString, numbers) -> if operationString == '+' then foldl1 (+) numbers else foldl1 (*) numbers)
+  & map (\(operation, numbers) -> if operation == '+' then sum numbers else product numbers)
   & sum
 
 --     https://adventofcode.com/2025/day/6
