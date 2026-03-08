@@ -13,20 +13,20 @@ parseRanges ranges = ranges
   & concatMap (\(start, end) -> [read start..read $ tail end])
   & Set.fromList
 
-parseFoods :: [String] -> [Int]
-parseFoods foods = map read foods
+parseFoods :: [String] -> Set.Set Int
+parseFoods foods = map read foods & Set.fromList
 
-part1 input = input
+part1 (validSet, foodSet) = Set.intersection validSet foodSet & Set.size
 
 part2 input = input
 
 --     https://adventofcode.com/2025/day/5
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/5/input-mini.txt"
+  contents <- readFile "app/aoc/2025/5/input.txt"
 
   let parsedContent = parse contents
   print parsedContent
 
-  -- print $ part1 parsedContent
-  -- print $ part2 parsedContent
+  print $ part1 parsedContent
+  print $ part2 parsedContent
