@@ -2,8 +2,8 @@ import Data.Function ((&))
 import Data.List.Split (splitOn)
 import Data.List (transpose)
 
-parse :: String -> [(Int -> Int -> Int, [Int])]
-parse input = (lines input)
+parse1 :: String -> [(Int -> Int -> Int, [Int])]
+parse1 input = lines input
   & map (splitOn " ")
   & map (filter (/= ""))
   & transpose
@@ -17,6 +17,8 @@ part1 input = input
 
   where calculate (operator, numbers) = foldl1 operator numbers
 
+parse2 input = lines input
+
 part2 input = "pt2"
 
 --     https://adventofcode.com/2025/day/6
@@ -24,8 +26,5 @@ main :: IO ()
 main = do
   contents <- readFile "app/aoc/2025/6/input.txt"
 
-  let parsedContent = parse contents
-  -- print $ parsedContent
-
-  print $ part1 parsedContent
-  print $ part2 parsedContent
+  parse1 contents & part1 & print
+  parse2 contents & part2 & print
