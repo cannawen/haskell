@@ -1,6 +1,8 @@
 import Data.Function ((&))
-import Data.List.Split (splitOn)
+import Data.List.Split (splitOn, splitWhen)
 import Data.List (transpose)
+import qualified Data.Text as T
+import qualified Data.List.Split.Internals as T
 
 parse1 :: String -> [(Int -> Int -> Int, [Int])]
 parse1 input = lines input
@@ -17,9 +19,23 @@ part1 input = input
 
   where calculate (operator, numbers) = foldl1 operator numbers
 
-parse2 input = lines input
+parse2 :: String -> [(Char, [Int])]
+parse2 input = zip operations numbers
+  where operations = filter (\c -> c == '*' || c == '+') (last $ lines input)
+        numbers = 
+          input 
+          & lines 
+          & init 
+          & transpose 
+          & map T.pack 
+          & map T.strip
+          & map T.unpack
+          & splitWhen (=="")
+          & map (map read)  
 
-part2 input = "pt2"
+part2 input = input
+  & map (\(operationString, numbers) -> if operationString == '+' then foldl1 (+) numbers else foldl1 (*) numbers)
+  & sum
 
 --     https://adventofcode.com/2025/day/6
 main :: IO ()
