@@ -6,19 +6,17 @@ parse input = (parseRanges ranges, parseFoods $ tail foods)
   where splitIndex = fromMaybe 0 (elemIndex "" (lines input))
         (ranges, foods) = splitAt splitIndex (lines input)
 
-parseRanges :: [String] -> [(Int, Int)]
-parseRanges ranges = ranges
-  & map (break (== '-'))
-  & map (\(start, end) -> (read start, read $ tail end))
+        parseRanges :: [String] -> [(Int, Int)]
+        parseRanges ranges = ranges
+          & map (break (== '-'))
+          & map (\(start, end) -> (read start, read $ tail end))
 
-parseFoods :: [String] -> [Int]
-parseFoods foods = map read foods
-
-
-inRange food validRanges = validRanges
-  & any (\range -> food >= fst range && food <= snd range)
+        parseFoods :: [String] -> [Int]
+        parseFoods foods = map read foods
 
 part1 (validRanges, foodSet) = filter (\food -> inRange food validRanges) foodSet & length & show
+  where inRange food validRanges = validRanges
+          & any (\range -> food >= fst range && food <= snd range)
 
 part2 input = input
 
@@ -30,4 +28,4 @@ main = do
   let parsedContent = parse contents
 
   print $ part1 parsedContent
-  -- print $ part2 parsedContent
+  print $ part2 parsedContent
