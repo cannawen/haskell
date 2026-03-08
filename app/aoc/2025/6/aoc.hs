@@ -15,10 +15,7 @@ part1 input = input
   & map calculate
   & sum
 
-  where
-  -- where getOperator mathArray = if head mathArray == "+" then (+) else (*)
-  --       getNumbers mathArray = map read (tail mathArray)
-        calculate (operator, numbers) = foldl operator (head numbers) (tail numbers)
+  where calculate (operator, numbers) = foldl1 operator numbers
 
 part2 input = "pt2"
 
