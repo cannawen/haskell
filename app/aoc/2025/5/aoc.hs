@@ -1,5 +1,4 @@
 import Data.Function ((&))
-import qualified Data.Set as Set
 import Data.List (elemIndex)
 import Data.Maybe (fromMaybe)
 
@@ -7,16 +6,19 @@ parse input = (parseRanges ranges, parseFoods $ tail foods)
   where splitIndex = fromMaybe 0 (elemIndex "" (lines input))
         (ranges, foods) = splitAt splitIndex (lines input)
 
-parseRanges :: [String] -> Set.Set Int
+parseRanges :: [String] -> [(Int, Int)]
 parseRanges ranges = ranges
   & map (break (== '-'))
-  & concatMap (\(start, end) -> [read start..read $ tail end])
-  & Set.fromList
+  & map (\(start, end) -> (read start, read $ tail end))
 
-parseFoods :: [String] -> Set.Set Int
-parseFoods foods = map read foods & Set.fromList
+parseFoods :: [String] -> [Int]
+parseFoods foods = map read foods
 
-part1 (validSet, foodSet) = Set.intersection validSet foodSet & Set.size
+
+inRange food validRanges = validRanges
+  & any (\range -> food >= fst range && food <= snd range)
+
+part1 (validRanges, foodSet) = filter (\food -> inRange food validRanges) foodSet & length & show
 
 part2 input = input
 
@@ -26,7 +28,6 @@ main = do
   contents <- readFile "app/aoc/2025/5/input.txt"
 
   let parsedContent = parse contents
-  print parsedContent
 
   print $ part1 parsedContent
-  print $ part2 parsedContent
+  -- print $ part2 parsedContent
