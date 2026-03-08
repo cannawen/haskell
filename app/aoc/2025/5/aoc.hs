@@ -7,9 +7,9 @@ import Data.Tuple (swap)
 
 parse input = (parseRanges ranges, parseFoods foods)
 
-  where splitIndex = fromMaybe 0 (elemIndex "" (lines input))
-        ranges = take splitIndex (lines input)
-        foods = drop (splitIndex + 1) (lines input)
+  where r:f:_ = splitOn "\n\n" input
+        ranges = lines r
+        foods = lines f
 
         parseRanges :: [String] -> [(Int, Int)]
         parseRanges ranges = ranges
