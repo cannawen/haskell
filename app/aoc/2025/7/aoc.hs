@@ -1,14 +1,11 @@
 import Data.Function ((&))
 import Data.List.Split (splitOn, splitWhen)
-import Data.List ( elemIndices, intercalate )
+import Data.List ( elemIndices, intercalate, sort )
 import qualified Data.Text as T
 import qualified Data.List.Split.Internals as T
 import qualified Data.Map as Map
 import Text.Show.Pretty (pPrint)
-
--- Equivalent to Clojure's frequencies
-frequencies :: Ord a => [a] -> Map.Map a Int
-frequencies xs = Map.fromListWith (+) [(x, 1) | x <- xs]
+import Data.Maybe (fromMaybe)
 
 modifyCurrentRow prevRow row =
   let findHit = map (\(prev, curr) -> if prev == 'S' && curr == '.' then 'S' else
@@ -36,25 +33,41 @@ parse input = map (map convertToInt) (lines input)
                           '^' -> splitter
                           _ -> 0
 
-modifyCurrentRow' prevRow row =
-  let findHit = map (\(prev, curr) -> if prev > 0 && curr == 0 then prev else
-                                      if prev > 0 && curr == splitter then hitSplitter else
-                                      curr) (zip prevRow row)
-      hitSplitterIndices = elemIndices hitSplitter findHit
-      newRayIndices = Map.unionsWith (+) (map (\i -> Map.fromList [(i-1,prevRow!!i),(i+1,prevRow!!i)]) hitSplitterIndices)
-      newRow = map (\(i, curr) ->
-        if curr < 0 then
-          curr
-        else
-          Map.findWithDefault 0 i newRayIndices
-          + if prevRow!!i > 0 then prevRow!!i else 0
-          ) (zip [0..] findHit)
+-- collatedRowDeltas :: [(Int, Int)] -> [(Int, Int)]
+collatedRowDeltas deltas = 
+  foldl 
+  (\memo (i, val) ->
+    if (fst (head memo)) == i
+      then (i, (snd (head memo)) + val):(tail memo)
+    else 
+      (i,val):memo) 
+  [head deltas]
+  (tail deltas)
+  & Map.fromList
 
-  in newRow
+newRowDeltas prevRow currRow = 
+          foldl
+          (\memo (i, (prevRowVal, currRowVal)) ->
+            if currRowVal == splitter && prevRowVal > 0 
+              then (i-1, prevRowVal):(i+1, prevRowVal):memo 
+            else if currRowVal == 0 && prevRowVal > 0 
+              then (i, prevRowVal):memo 
+            else 
+              memo) 
+          [] 
+          (zip [0..] (zip prevRow currRow)) & sort
+
+modifyCurrentRow' :: [Int] -> [Int] -> [Int]
+modifyCurrentRow' prevRow currRow = 
+  map (\(i, value) -> 
+    fromMaybe 
+      value 
+      (Map.lookup i (collatedRowDeltas $ newRowDeltas prevRow currRow)))
+  (zip [0..] currRow)
+
 
 part2 input = foldl1 modifyCurrentRow' input & filter (>0) & sum
--- part2 input = scanl1 modifyCurrentRow' input -- & sum
-
+-- part2 input = scanl1 modifyCurrentRow' input
 
 prettyMatrix :: [[Int]] -> String
 prettyMatrix rows =
@@ -71,4 +84,5 @@ main = do
   contents <- readFile "app/aoc/2025/7/input.txt"
 
   lines contents & part1 & print
-  parse contents & part2 & print -- prettyMatrix & putStrLn
+  parse contents & part2 & print
+  -- parse contents & part2 & prettyMatrix & putStrLn
