@@ -4,6 +4,8 @@ import Data.List (elemIndices)
 import qualified Data.Text as T
 import qualified Data.List.Split.Internals as T
 import qualified Data.Map as Map
+import Text.Show.Pretty (pPrint)
+import Data.List (intercalate)
 
 -- Equivalent to Clojure's frequencies
 frequencies :: Ord a => [a] -> Map.Map a Int
@@ -19,7 +21,7 @@ modifyCurrentRow prevRow row =
 
   in newRow
 
-part1 input = scanl1 modifyCurrentRow input -- & concat & filter (=='h') & length
+part1 input = scanl1 modifyCurrentRow input & concat & filter (=='h') & length
 
 ------
 
@@ -41,16 +43,32 @@ modifyCurrentRow' prevRow row =
                                       curr) (zip prevRow row)
       hitSplitterIndices = elemIndices hitSplitter findHit
       newRayIndices = Map.unionsWith (+) (map (\i -> Map.fromList [(i-1,prevRow!!i),(i+1,prevRow!!i)]) hitSplitterIndices)
-      newRow = map (\(i, curr) -> Map.findWithDefault curr i newRayIndices) (zip [0..] findHit)
+      newRow = map (\(i, curr) -> 
+        if curr < 0 then
+          curr
+        else
+          Map.findWithDefault 0 i newRayIndices 
+          + if prevRow!!i > 0 then prevRow!!i else 0
+          ) (zip [0..] findHit)
 
   in newRow
 
-part2 input = scanl1 modifyCurrentRow' input
+part2 input = foldl1 modifyCurrentRow' input & sum
+
+
+prettyMatrix :: [[Int]] -> String
+prettyMatrix rows =
+  let width = maximum (map (length . show) (concat rows))
+      pad n =
+        let s = show n
+        in replicate (width - length s) ' ' ++ s
+      renderRow r = "[ " ++ intercalate " " (map pad r) ++ " ]"
+  in unlines (map renderRow rows)
 
 --     https://adventofcode.com/2025/day/7
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/7/input-mini.txt"
+  contents <- readFile "app/aoc/2025/7/input.txt"
 
   lines contents & part1 & print
-  parse contents & part2 & print
+  parse contents & part2 & print -- prettyMatrix & putStrLn

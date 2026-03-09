@@ -42,6 +42,6 @@ executable 6
 
 executable 7
     main-is:          aoc.hs
-    build-depends:    text ^>=2.0.2, split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
+    build-depends:    text ^>=2.0.2, split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5, pretty-show ^>=1.10,
     hs-source-dirs:   app/aoc/2025/7
     default-language: Haskell2010
