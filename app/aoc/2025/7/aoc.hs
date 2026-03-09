@@ -4,8 +4,6 @@ import Data.List (elemIndices)
 import qualified Data.Text as T
 import qualified Data.List.Split.Internals as T
 
-parse input = lines input
-
 modifyCurrentRow prevRow row = 
   let findHit = map (\(prev, curr) -> if prev == 'S' && curr == '.' then 'S' else 
                                      if prev == 'S' && curr == '^' then 'h' else 
@@ -18,12 +16,35 @@ modifyCurrentRow prevRow row =
 
 part1 input = scanl1 modifyCurrentRow input -- & concat & filter (=='h') & length
 
-part2 input = "pt2"
+------
+
+ray = -1
+splitter = -2
+newline = -3
+
+parse :: String -> [[Int]]
+parse input = splitOn [newline] (map (\c -> case c of 
+                                      '.' -> 0
+                                      'S' -> ray
+                                      '^' -> splitter
+                                      _ -> newline) input)
+
+modifyCurrentRow' prevRow row = 
+  let findHit = map (\(prev, curr) -> if prev == 'S' && curr == '.' then 'S' else 
+                                     if prev == 'S' && curr == '^' then 'h' else 
+                                     curr) (zip prevRow row)
+      hIndices = elemIndices 'h' findHit
+      newSIndices = concatMap (\i -> [i-1, i+1]) hIndices
+      newRow = map (\(i, curr) -> if elem i newSIndices then 'S' else curr) (zip [0..] findHit)
+
+  in newRow
+
+part2 input = input
 
 --     https://adventofcode.com/2025/day/7
 main :: IO ()
 main = do
   contents <- readFile "app/aoc/2025/7/input-mini.txt"
 
-  parse contents & part1 & print
+  lines contents & part1 & print
   parse contents & part2 & print
