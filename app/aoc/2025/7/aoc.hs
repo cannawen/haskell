@@ -16,13 +16,14 @@ modifyCurrentRow prevRow row =
 
   in newRow
 
-part1 input = scanl1 (\prevRow row -> modifyCurrentRow prevRow row) input & concat & filter (=='h') & length
+part1 input = scanl1 modifyCurrentRow input -- & concat & filter (=='h') & length
+
 part2 input = "pt2"
 
 --     https://adventofcode.com/2025/day/7
 main :: IO ()
 main = do
-  contents <- readFile "app/aoc/2025/7/input.txt"
+  contents <- readFile "app/aoc/2025/7/input-mini.txt"
 
   parse contents & part1 & print
   parse contents & part2 & print
