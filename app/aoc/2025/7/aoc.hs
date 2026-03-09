@@ -28,14 +28,13 @@ part1 input = scanl1 modifyCurrentRow input & concat & filter (=='h') & length
 ray = 1
 hitSplitter = -1
 splitter = -2
-newline = -3
 
 parse :: String -> [[Int]]
-parse input = splitOn [newline] (map (\c -> case c of 
-                                      '.' -> 0
-                                      'S' -> ray
-                                      '^' -> splitter
-                                      _ -> newline) input)
+parse input = map (map convertToInt) (lines input)
+  where convertToInt c = case c of 
+                          'S' -> ray
+                          '^' -> splitter
+                          _ -> 0
 
 modifyCurrentRow' prevRow row = 
   let findHit = map (\(prev, curr) -> if prev > 0 && curr == 0 then prev else 
