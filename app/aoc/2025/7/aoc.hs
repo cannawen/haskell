@@ -45,9 +45,10 @@ collatedRowDeltas deltas =
   (tail deltas)
   & Map.fromList
 
+rowDeltas :: [Int] -> [Int] -> [(Int, Int)]
 rowDeltas prevRow currRow =
           foldl
-          (\memo (i, (prevRowVal, currRowVal)) ->
+          (\memo (i, prevRowVal, currRowVal) ->
             if currRowVal == splitter && prevRowVal > 0
               then (i - 1, prevRowVal) : (i + 1, prevRowVal) : memo
             else if currRowVal == 0 && prevRowVal > 0
@@ -55,7 +56,7 @@ rowDeltas prevRow currRow =
             else
               memo)
           []
-          (zip [0..] (zip prevRow currRow)) & sort
+          (zip3 [0..] prevRow currRow) & sort
 
 modifyCurrentRow' :: [Int] -> [Int] -> [Int]
 modifyCurrentRow' prevRow currRow =
@@ -64,7 +65,6 @@ modifyCurrentRow' prevRow currRow =
       value
       (Map.lookup i (collatedRowDeltas $ rowDeltas prevRow currRow)))
   (zip [0..] currRow)
-
 
 part2 input = foldl1 modifyCurrentRow' input & filter (>0) & sum
 -- part2 input = scanl1 modifyCurrentRow' input
