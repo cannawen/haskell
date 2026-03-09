@@ -34,35 +34,35 @@ parse input = map (map convertToInt) (lines input)
                           _ -> 0
 
 -- collatedRowDeltas :: [(Int, Int)] -> [(Int, Int)]
-collatedRowDeltas deltas = 
-  foldl 
+collatedRowDeltas deltas =
+  foldl
   (\memo (i, val) ->
-    if (fst (head memo)) == i
-      then (i, (snd (head memo)) + val):(tail memo)
-    else 
-      (i,val):memo) 
+    if fst (head memo) == i
+      then (i, snd (head memo) + val ) : tail memo
+    else
+      (i, val) : memo)
   [head deltas]
   (tail deltas)
   & Map.fromList
 
-newRowDeltas prevRow currRow = 
+rowDeltas prevRow currRow =
           foldl
           (\memo (i, (prevRowVal, currRowVal)) ->
-            if currRowVal == splitter && prevRowVal > 0 
-              then (i-1, prevRowVal):(i+1, prevRowVal):memo 
-            else if currRowVal == 0 && prevRowVal > 0 
-              then (i, prevRowVal):memo 
-            else 
-              memo) 
-          [] 
+            if currRowVal == splitter && prevRowVal > 0
+              then (i - 1, prevRowVal) : (i + 1, prevRowVal) : memo
+            else if currRowVal == 0 && prevRowVal > 0
+              then (i, prevRowVal) : memo
+            else
+              memo)
+          []
           (zip [0..] (zip prevRow currRow)) & sort
 
 modifyCurrentRow' :: [Int] -> [Int] -> [Int]
-modifyCurrentRow' prevRow currRow = 
-  map (\(i, value) -> 
-    fromMaybe 
-      value 
-      (Map.lookup i (collatedRowDeltas $ newRowDeltas prevRow currRow)))
+modifyCurrentRow' prevRow currRow =
+  map (\(i, value) ->
+    fromMaybe
+      value
+      (Map.lookup i (collatedRowDeltas $ rowDeltas prevRow currRow)))
   (zip [0..] currRow)
 
 
