@@ -1,3 +1,6 @@
+-- ghci learnMe.hs
+-- `ghci> :r` to reload
+
 doubleMe x = x + x
 doubleUs x y = doubleMe x + doubleMe y
 
@@ -20,3 +23,12 @@ indexOut = prependNumbers !! 1
 -- [1, 2, 3] < [1, 3, 2] -- True
 -- [1, 2] < [1, 2, 3] -- True
 -- [11] < [1, 2, 3] -- False
+
+-- Learn how to write recursion
+fib 0 = 0
+fib 1 = 1
+fib n = fib (n-1) + fib (n-2)
+
+max' [] = Nothing
+max' [x] = Just x
+max' (x:xs) = max (Just x) (max' xs)
