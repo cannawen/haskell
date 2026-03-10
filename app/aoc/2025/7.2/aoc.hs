@@ -6,10 +6,10 @@ data Tile
     | Path Int
     deriving (Show, Eq, Ord)
 
-combineTiles :: Int -> Tile -> Tile -> [(Int, Tile)]
-combineTiles i (Path prev) (Path curr) = [(i, Path (prev + curr))]
-combineTiles i (Path prev) Splitter = [(i-1, Path prev), (i+1, Path prev), (i, Splitter)]
-combineTiles i prev curr = [(i, curr)]
+combineTiles :: (Int, Tile, Tile) -> [(Int, Tile)]
+combineTiles (i, Path prev, Path curr) = [(i, Path (prev + curr))]
+combineTiles (i, Path prev, Splitter) = [(i-1, Path prev), (i+1, Path prev), (i, Splitter)]
+combineTiles (i, prev, curr) = [(i, curr)]
 
 type Row  = [Tile]
 type Grid = [Row]
@@ -30,18 +30,13 @@ sumRow row = sum [n | Path n <- row]
 calculateNewRow :: Row -> Row -> Row
 calculateNewRow prevRow currRow = map snd collated
     where
-        deltas =
-            map
-            (\(i, prevRowTile, currRowTile) ->
-                combineTiles i prevRowTile currRowTile)
-            (zip3 [0..] prevRow currRow)
-            & concatMap sort
+        deltas = concatMap sort $ map combineTiles (zip3 [0..] prevRow currRow)
         collated =
             foldl
-            (\memo newDelta -> 
+            (\memo newDelta ->
                 let (prevIndex, prevTile) = head memo
                     (currIndex, currTile) = newDelta
-                in if prevIndex == currIndex then (combineTiles prevIndex prevTile currTile) ++ (tail memo) else newDelta:memo)
+                in if prevIndex == currIndex then combineTiles (prevIndex, prevTile, currTile) ++ tail memo else newDelta : memo)
             [head deltas]
             (tail deltas)
             & sort
