@@ -1,0 +1,14 @@
+cradle:
+  multi:
+    # Prefer Cabal for project files under app/
+    - path: "./app"
+      config:
+        cradle:
+          cabal: {}
+
+    # Fallback for standalone .hs files (learnMe.hs, euler.hs, new scratch files, etc.)
+    - path: "./"
+      config:
+        cradle:
+          direct:
+            arguments: ["-i.", "-iapp"]
