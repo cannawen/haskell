@@ -21,6 +21,30 @@ parse contents = lines contents
     & map V.fromList
     & V.fromList
 
+calculateNewRow :: Row -> Row -> Row
+calculateNewRow prevRow currRow = currRow
+    where 
+        deltas = 
+            map 
+            (\(i, prevRowTile, currRowTile) -> 
+                -- this transformation turns splitters into Path 0
+                if prevRowTile > Path 0 && currRowTile == Splitter then [(i-1, prevRowTile), (i, Path 0), (i+1, prevRowTile)] else [(i, prevRowTile)] ) 
+            (zip3 [0..] (V.toList prevRow) (V.toList currRow))
+            & concatMap sort
+        collate = 
+            foldl 
+            (\memo newDelta -> if fst (head memo) == fst newDelta then (fst (head memo), snd (head memo) + snd newDelta):memo else newDelta:memo) 
+            [head deltas]
+            (tail deltas)
+        
+
+        
+        
+
+part1 :: Grid -> Int
+part1 grid = 2
+    where x = foldl1 calculateNewRow grid
+
 --     https://adventofcode.com/2025/day/7
 main :: IO ()
 main = do
