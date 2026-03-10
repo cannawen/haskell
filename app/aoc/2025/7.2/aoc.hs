@@ -1,10 +1,16 @@
 import Data.Function ((&))
 import qualified Data.Vector as V
+import Data.List (sort)
 
 data Tile
     = Splitter
     | Path Int
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
+
+combineTiles :: Int -> Tile -> Tile -> [(Int, Tile)]
+combineTiles i (Path prev) (Path curr) = [(i, Path (prev + curr))]
+combineTiles i (Path prev) (Splitter) = [(i-1, Path (prev)), (i+1, Path (prev)), (i, Splitter)]
+combineTiles i prev curr = [(i, curr)]
 
 -- newtype Row  = Row [Tile] deriving (Show, Eq)
 -- newtype Grid = Grid [Row] deriving (Show, Eq)
