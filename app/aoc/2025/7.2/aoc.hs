@@ -14,12 +14,14 @@ combineTiles i prev curr = [(i, curr)]
 type Row  = [Tile]
 type Grid = [Row]
 
+parseTile :: Char -> Tile
+parseTile 'S' = Path 1
+parseTile '^' = Splitter
+parseTile _ = Path 0
+
 parse :: String -> Grid
 parse contents = lines contents
-    & map (map (\c ->
-        if c == 'S' then Path 1 else
-        if c == '^' then Splitter else
-        Path 0 ))
+    & map (map parseTile)
     & filter (any (/= Path 0))
 
 sumRow :: Row -> Int
