@@ -1,5 +1,4 @@
 import Data.Function ((&))
-import qualified Data.Vector as V
 import Data.List (sort)
 
 data Tile
@@ -9,13 +8,13 @@ data Tile
 
 combineTiles :: Int -> Tile -> Tile -> [(Int, Tile)]
 combineTiles i (Path prev) (Path curr) = [(i, Path (prev + curr))]
-combineTiles i (Path prev) (Splitter) = [(i-1, Path (prev)), (i+1, Path (prev)), (i, Splitter)]
+combineTiles i (Path prev) Splitter = [(i-1, Path prev), (i+1, Path prev), (i, Splitter)]
 combineTiles i prev curr = [(i, curr)]
 
 -- newtype Row  = Row [Tile] deriving (Show, Eq)
 -- newtype Grid = Grid [Row] deriving (Show, Eq)
-type Row  = V.Vector Tile
-type Grid = V.Vector Row
+type Row  = [Tile]
+type Grid = [Row]
 
 parse :: String -> Grid
 parse contents = lines contents
@@ -24,28 +23,26 @@ parse contents = lines contents
         if c == '^' then Splitter else
         Path 0 ))
     & filter (any (/= Path 0))
-    & map V.fromList
-    & V.fromList
 
 calculateNewRow :: Row -> Row -> Row
 calculateNewRow prevRow currRow = currRow
-    where 
-        deltas = 
-            map 
-            (\(i, prevRowTile, currRowTile) -> 
+    where
+        deltas =
+            map
+            (\(i, prevRowTile, currRowTile) ->
                 -- this transformation turns splitters into Path 0
-                if prevRowTile > Path 0 && currRowTile == Splitter then [(i-1, prevRowTile), (i, Path 0), (i+1, prevRowTile)] else [(i, prevRowTile)] ) 
-            (zip3 [0..] (V.toList prevRow) (V.toList currRow))
+                combineTiles i prevRowTile currRowTile)
+            (zip3 [0..] prevRow currRow)
             & concatMap sort
-        collate = 
-            foldl 
-            (\memo newDelta -> if fst (head memo) == fst newDelta then (fst (head memo), snd (head memo) + snd newDelta):memo else newDelta:memo) 
+        collate =
+            foldl
+            (\memo newDelta -> if fst (head memo) == fst newDelta then (fst (head memo), snd (head memo) + snd newDelta):memo else newDelta:memo)
             [head deltas]
             (tail deltas)
-        
 
-        
-        
+
+
+
 
 part1 :: Grid -> Int
 part1 grid = 2
