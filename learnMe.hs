@@ -46,3 +46,19 @@ take' n (x:xs)
     | n <= 0 = []
     | n > length xs = x:xs
     | otherwise = x : take' (n-1) xs
+
+reverse' :: [a] -> [a]
+reverse' [x] = [x]
+reverse' (x:xs) = (reverse' xs) ++ [x]
+
+repeat' :: a -> [a]
+repeat' x = x:repeat' x
+
+zip' :: [a] -> [b] -> [(a,b)]
+zip' [] ys = []
+zip' xs [] = []
+zip' (x:xs) (y:ys) = (x, y) : zip' xs ys
+
+elem' :: Eq a => a -> [a] -> Bool
+elem' e [] = False
+elem' e (x:xs) = if e == x then True else elem' e xs
