@@ -111,3 +111,8 @@ collatzSeq 1 = [1]
 collatzSeq i 
     | mod i 2 == 0 = i : collatzSeq (div i 2) 
     | otherwise = i : collatzSeq (i * 3 + 1)
+
+map'' :: (a -> b -> c) -> [a] -> [b] -> [c]
+map'' _ _ [] = []
+map'' _ [] _ = []
+map'' f (a:as) (b:bs) = f a b : map'' f as bs
