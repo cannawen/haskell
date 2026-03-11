@@ -62,3 +62,11 @@ zip' (x:xs) (y:ys) = (x, y) : zip' xs ys
 elem' :: Eq a => a -> [a] -> Bool
 elem' e [] = False
 elem' e (x:xs) = if e == x then True else elem' e xs
+
+quicksort' :: Ord a => [a] -> [a]
+quicksort' [] = []
+quicksort' (x:xs) = (quicksort' $ filter (<x) xs) ++ [x] ++ (quicksort' $ filter (>=x) xs)
+
+quicksort'' :: Ord a => [a] -> [a]
+quicksort'' [] = []
+quicksort'' (x:xs) = quicksort'' [y | y <- xs, y < x] ++ [x] ++ quicksort'' [y | y <- xs, y >= x]
