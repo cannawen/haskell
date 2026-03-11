@@ -40,3 +40,9 @@ replicate' n y = y : replicate' (n-1) y
 replicate'' n y
     | n <= 0 = []
     | otherwise = y : replicate'' (n-1) y
+
+take' :: Int -> [a] -> [a]
+take' n xs 
+    | n <= 0 = []
+    | n >= length xs = xs
+take' n (x:xs) = x : take' (n-1) xs
