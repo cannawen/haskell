@@ -70,3 +70,18 @@ quicksort' (x:xs) = (quicksort' $ filter (<x) xs) ++ [x] ++ (quicksort' $ filter
 quicksort'' :: Ord a => [a] -> [a]
 quicksort'' [] = []
 quicksort'' (x:xs) = quicksort'' [y | y <- xs, y < x] ++ [x] ++ quicksort'' [y | y <- xs, y >= x]
+
+applyTwice :: (a -> a) -> a -> a
+applyTwice f x = f (f x)
+
+zipWith' :: (a -> b -> (a, b)) -> [a] -> [b] -> [(a, b)]
+zipWith' f [] ys = []
+zipWith' f xs [] = []
+zipWith' f (x:xs) (y:ys) = (x,y) : zipWith' f xs ys
+
+flip' :: (a -> b -> c) -> (b -> a -> c)
+flip' f = g
+    where g x y = f y x
+
+flip'' :: (a -> b -> c) -> b -> a -> c
+flip'' f x y = f y x
