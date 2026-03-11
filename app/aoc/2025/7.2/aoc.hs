@@ -19,11 +19,6 @@ parseTile 'S' = Path 1
 parseTile '^' = Splitter
 parseTile _ = Path 0
 
--- parseTile' :: Char -> Tile
--- parseTile' t = case t of 'S' -> Path 1
---                          '^' -> Splitter
---                          _ -> Path 0
-
 combineTiles :: (Int, Tile, Tile) -> [(Int, Tile)]
 combineTiles (i, Path prev, Path curr) = [(i, Path (prev + curr))]
 combineTiles (i, Path prev, Splitter) = [(i-1, Path prev), (i+1, Path prev), (i, Splitter)]
@@ -53,7 +48,6 @@ calculateNewRow prevRow currRow = map snd collated
 
 part2 :: Grid -> Int
 part2 grid = sumRow (foldl1 calculateNewRow grid)
--- part2 grid = scanl1 calculateNewRow grid
 
 --     https://adventofcode.com/2025/day/7
 main :: IO ()
