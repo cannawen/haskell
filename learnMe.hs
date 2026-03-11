@@ -42,7 +42,7 @@ replicate'' n y
     | otherwise = y : replicate'' (n-1) y
 
 take' :: Int -> [a] -> [a]
-take' n (x:xs) 
+take' n (x:xs)
     | n <= 0 = []
     | n > length xs = x:xs
     | otherwise = x : take' (n-1) xs
@@ -92,3 +92,22 @@ flip''' f x y = f y x
 
 max'' :: Ord a => a -> a -> a
 max'' x y = if x > y then x else y
+
+map' :: (a -> b) -> [a] -> [b]
+map' f [] = []
+map' f (x:xs) = f x : map' f xs
+
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' f [] = []
+filter' f (x:xs) 
+    | f x = x : filter' f xs
+    | otherwise = filter' f xs
+
+x = head $ reverse' $ filter' (\x -> mod x 3829 == 0) [1..100000]
+y = sum $ takeWhile (<10000) $ filter odd [x*x | x <-[1..]] 
+
+collatzSeq :: Int -> Int
+collatzSeq 1 = 1
+collatzSeq i 
+    | mod i 2 == 0 = collatzSeq (div i 2) 
+    | otherwise = collatzSeq (i * 3 + 1)
