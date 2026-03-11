@@ -82,6 +82,7 @@ zipWith' f (x:xs) (y:ys) = (x,y) : zipWith' f xs ys
 flip' :: (a -> b -> c) -> (b -> a -> c)
 flip' f = g
     where g = (\ x y -> f y x)
+    -- where g x y = f y x
 
 flip'' :: (a -> b -> c) -> (b -> a -> c)
 flip'' f = (\ x y -> f y x)
