@@ -106,8 +106,8 @@ filter' f (x:xs)
 x = head $ reverse' $ filter' (\x -> mod x 3829 == 0) [1..100000]
 y = sum $ takeWhile (<10000) $ filter odd [x*x | x <-[1..]] 
 
-collatzSeq :: Int -> Int
-collatzSeq 1 = 1
+collatzSeq :: Int -> [Int]
+collatzSeq 1 = [1]
 collatzSeq i 
-    | mod i 2 == 0 = collatzSeq (div i 2) 
-    | otherwise = collatzSeq (i * 3 + 1)
+    | mod i 2 == 0 = i : collatzSeq (div i 2) 
+    | otherwise = i : collatzSeq (i * 3 + 1)
