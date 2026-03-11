@@ -32,3 +32,11 @@ fib n = fib (n-1) + fib (n-2)
 max' [] = Nothing
 max' [x] = Just x
 max' (x:xs) = max (Just x) (max' xs)
+
+replicate' :: Int -> a -> [a]
+replicate' 1 y = [y]
+replicate' n y = y : replicate' (n-1) y
+
+replicate'' n y
+    | n <= 0 = []
+    | otherwise = y : replicate'' (n-1) y
