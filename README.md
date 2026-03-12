@@ -42,3 +42,12 @@ circleArea r = let pi = 3.1415926
                    square x = x * x
                in pi * square r
 ```
+
+
+# Modules
+- Import everything: `import Data.List`
+- `ghci> :m + Data.List Data.Map`
+- Import only some functions `import Data.List (nub, sort)`
+- Import only expluding some functions `import Data.List hiding (nub)`
+- Import without name clashing `import qualified Data.List` to get `Data.List.nub`
+- Import without name clashing `import qualified Data.List as M` to get `M.nub`
