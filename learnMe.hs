@@ -116,3 +116,43 @@ map'' :: (a -> b -> c) -> [a] -> [b] -> [c]
 map'' _ _ [] = []
 map'' _ [] _ = []
 map'' f (a:as) (b:bs) = f a b : map'' f as bs
+
+mapl :: (a -> b) -> [a] -> [b]
+mapl f xs = foldl (\acc x -> acc ++ [f x]) [] xs
+
+mapr :: (a -> b) -> [a] -> [b]
+mapr f xs = foldr (\x acc -> f x : acc) [] xs
+
+elemr :: (Eq a) => a -> [a] -> Bool
+elemr x xs = foldr (\elem acc -> acc || elem == x) False xs
+
+add x y = x+y
+zr = foldr add 0 [3, 2, 1]
+z = add 3 (add 2 (add 1 0))
+
+zl = foldl add 0 [3, 2, 1]
+
+and' :: [Bool] -> Bool
+and' xs = foldr (&&) True xs
+
+z' = sum (filter ( > 10) (map (*2) [2..10]))
+z'' = sum $ filter ( > 10) $ map (*2) [2..10]
+
+a :: [Double]
+a = map ($ 3.0) [(4 +), (10 *), (^ 2), sqrt]
+
+b = map (negate . abs) [5, -3, 6, 7]
+c = map (\xs -> negate (sum (tail xs))) [[1..5], [3..6], [1..7]]
+c' = map (negate. sum . tail) [[1..5], [3..6], [1..7]]
+
+d = sum (replicate 5 (max 6.7 8.9))
+d' = (sum . replicate 5) (max 6.7 8.9)
+d'' = sum . replicate 5 $ max 6.7 8.9
+
+e = replicate 2 (product (map (*3) (zipWith max [1,2] [4,5])))
+e' = replicate 2 . product . map (*3) $ zipWith max [1,2] [4,5]
+
+f x = ceiling (negate (tan (cos (max 50 x))))
+f' x = (ceiling . negate . tan . cos) $ max 50 x
+f'' = ceiling . negate . tan . cos . max 50
+
