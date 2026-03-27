@@ -50,13 +50,14 @@ part1 input = mergedCircuits & Set.toList & map points & map length & sort & rev
 
           mergedCircuits = foldl' merge Set.empty twoPointCircuits
 
+notIn smallCircuit bigCircuit = not (Set.isSubsetOf (points smallCircuit) (points bigCircuit))
+
 oneInEach smallCircuit bigCircuitA bigCircuitB = 
         (Set.member p1 (points bigCircuitA) && Set.member p2 (points bigCircuitB)) 
         || (Set.member p2 (points bigCircuitA) && Set.member p1 (points bigCircuitB))
     where p = points smallCircuit & Set.toList
           p1 = head p
           p2 = last p
-
 
 part2 input = answer & length
 
@@ -82,7 +83,9 @@ part2 input = answer & length
           bigCircuitA = Set.toList twoSeparateCircuits & head
           bigCircuitB = Set.toList twoSeparateCircuits & last
 
-          answer = filter (\twoPoint -> oneInEach twoPoint bigCircuitA bigCircuitB) twoPointCircuits
+          pointsNotInEither = filter (\twoPoint -> notIn twoPoint bigCircuitA && notIn twoPoint bigCircuitB) twoPointCircuits
+
+          answer = filter (\twoPoint -> oneInEach twoPoint bigCircuitA bigCircuitB) pointsNotInEither
 
 main = do
     contents <- readFile "app/aoc/2025/8/input.txt"
