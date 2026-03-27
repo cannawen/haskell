@@ -25,22 +25,13 @@ distance p1 p2 = (x p1 - x p2)^2 + (y p1 - y p2)^2 + (z p1 - z p2)^2
 
 combineCircuits a b = Circuit (Set.union (points a) (points b))
 
-a = Point 1 2 3
-b = Point 4 5 6
-c = Point 7 8 9
-
-d = Circuit (Set.fromList [a, b])
-e = Circuit (Set.fromList [c])
-f = Circuit (Set.fromList [a, c])
-
 merge :: Set.Set Circuit -> Circuit -> Set.Set Circuit
 merge existingCircuit newCircuit = Set.insert combinedAllCircuits independentCircuit
     where independentCircuit = Set.filter (\circuit ->  Set.disjoint (points circuit) (points newCircuit)) existingCircuit
           combinedExistingCircuits = foldl combineCircuits (Circuit Set.empty) (Set.difference existingCircuit independentCircuit) 
           combinedAllCircuits = combineCircuits combinedExistingCircuits newCircuit
 
--- part1 :: [Point]
-part1 input = final & Set.toList & map points & map length & sort & reverse & take 3 & foldr1 (*)
+part1 input = mergedCircuits & Set.toList & map points & map length & sort & reverse & take 3 & foldr1 (*)
 
     where combinations =
             [Set.fromList [p1, p2] | p1 <- input, p2 <- input, p1 /= p2]
@@ -57,10 +48,7 @@ part1 input = final & Set.toList & map points & map length & sort & reverse & ta
             & take 1000
             & map (\(_, p1, p2) -> Circuit (Set.fromList [p1, p2]))
 
-          final = foldl'
-            (\memo points -> merge memo points)
-            (Set.empty :: Set.Set Circuit)
-            twoPointCircuits
+          mergedCircuits = foldl' merge Set.empty twoPointCircuits
 
 main = do
     contents <- readFile "app/aoc/2025/8/input.txt"
