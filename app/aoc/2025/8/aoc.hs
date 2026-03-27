@@ -50,7 +50,42 @@ part1 input = mergedCircuits & Set.toList & map points & map length & sort & rev
 
           mergedCircuits = foldl' merge Set.empty twoPointCircuits
 
+oneInEach smallCircuit bigCircuitA bigCircuitB = 
+        (Set.member p1 (points bigCircuitA) && Set.member p2 (points bigCircuitB)) 
+        || (Set.member p2 (points bigCircuitA) && Set.member p1 (points bigCircuitB))
+    where p = points smallCircuit & Set.toList
+          p1 = head p
+          p2 = last p
+
+
+part2 input = answer & length
+
+    where combinations =
+            [Set.fromList [p1, p2] | p1 <- input, p2 <- input, p1 /= p2]
+            & Set.fromList
+            & Set.map Set.toList
+            & Set.toList
+            & sort
+
+          twoPointCircuits =
+            map
+                (\[p1, p2] -> (distance p1 p2, p1, p2))
+                combinations
+            & sort
+            & map (\(_, p1, p2) -> Circuit (Set.fromList [p1, p2]))
+
+          twoSeparateCircuits = scanl' merge Set.empty twoPointCircuits
+            & group & map head
+            & filter (\circuit -> Set.size circuit == 2)
+            & last
+        
+          bigCircuitA = Set.toList twoSeparateCircuits & head
+          bigCircuitB = Set.toList twoSeparateCircuits & last
+
+          answer = filter (\twoPoint -> oneInEach twoPoint bigCircuitA bigCircuitB) twoPointCircuits
+
 main = do
     contents <- readFile "app/aoc/2025/8/input.txt"
 
     print $ part1 $ parse contents
+    print $ part2 $ parse contents
