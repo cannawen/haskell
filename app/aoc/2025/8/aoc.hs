@@ -10,7 +10,14 @@ parse input =
     & map (\point -> map read point)
     & map (\arr -> (head arr, arr !! 1, arr !! 2))
 
-part1 input = input
+mergePointsIntoSets :: Set.Set (Int, Int, Int) -> (Int, Int, Int) -> (Int, Int, Int)
+mergePointsIntoSets setSet p1 p2 = 
+    if setsToMerge == []
+    then Set.insert (Set.fromList [p1, p2]) setSet
+    else setSet
+    where setsToMerge = Set.filter (\set -> Set.member p1 set || Set.member p2 set) setSet 
+
+part1 input =  final & map Set.size & sort & reverse & take 3
     where combinations = [(p1, p2) | (p1:rest) <- tails input, p2 <-rest] & sort
           distancesSquared = 
             map 
@@ -20,16 +27,10 @@ part1 input = input
             & sort
             & take 10
           final = foldl 
-            (\memo (_, p1, p2)  -> 
-                let connectp1p2ToExistingSets = map (\existingSet -> 
-                        if (Set.member p1 existingSet)
-                        then Set.insert p2 existingSet
-                        else if (Set.member p2 existingSet)
-                        then Set.insert p1 existingSet
-                        else existingSet) memo
-                in if filter (\x -> True) connectp1p2ToExistingSets)
-            [] 
+            (\memo (_, p1, p2)  -> mergePointsIntoSets memo p1 p2)
+            Set.empty 
             distancesSquared
+            
 main = do
     contents <- readFile "app/aoc/2025/8/input-mini.txt"
 
