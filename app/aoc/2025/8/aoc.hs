@@ -54,7 +54,7 @@ part1 input = final & Set.toList & map points & map length & sort & reverse & ta
                 (\[p1, p2] -> (distance p1 p2, p1, p2))
                 combinations
             & sort
-            & take 10
+            & take 1000
             & map (\(_, p1, p2) -> Circuit (Set.fromList [p1, p2]))
 
           final = foldl'
@@ -63,6 +63,6 @@ part1 input = final & Set.toList & map points & map length & sort & reverse & ta
             twoPointCircuits
 
 main = do
-    contents <- readFile "app/aoc/2025/8/input-mini.txt"
+    contents <- readFile "app/aoc/2025/8/input.txt"
 
     print $ part1 $ parse contents
