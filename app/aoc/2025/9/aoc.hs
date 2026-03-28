@@ -35,8 +35,24 @@ createSet points p1 p2 = points
                     else True)
     & Set.fromList
 
+isValid :: [Point] -> Point -> Point -> Bool
+isValid points p1 p2 = points
+    & find (\p -> 
+        ((x p) > min (x p1) (x p2) && (x p) < max (x p1) (x p2)) 
+        && 
+        ((y p) > min (y p1) (y p2) && (y p) < max (y p1) (y p2)))
+    & (== Nothing)
+
+shape = [Point 1 1, 
+         Point 4 1, 
+         Point 3 2, 
+         Point 3 3, 
+         Point 4 3, 
+         Point 4 4, 
+         Point 1 4]
+
 part2 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
-              & filter (\(p1, p2) -> Set.disjoint (pointSet p1 p2) (createSet input p1 p2))
+              & filter (\(p1, p2) -> isValid input p1 p2)
               & map (uncurry pointSet)
               & map Set.size
               & maximum
