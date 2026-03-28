@@ -25,7 +25,7 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
 
 rotate arr = tail arr ++ [head arr]
 
-part2 input = outlineSet
+part2 input = shape
     where outlineSet = 
             zip input (rotate input)
             & map (\(p1, p2) -> [Point x y | x <- [min (x p1) (x p2) .. max (x p1) (x p2)], y <- [min (y p1) (y p2) .. max (y p1) (y p2)]])
@@ -37,7 +37,15 @@ part2 input = outlineSet
             & map (\(p1, p2) -> [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]])
             & concat
             & Set.fromList
-          grid = [Point x y | x <- [0 .. input & map x & maximum], y <- [0 .. input & map y & maximum]]
+          shape = 
+            map 
+            (\y -> 
+                map 
+                (\x -> (x,y)
+                )
+                [0 .. input & map x & maximum]
+            ) 
+            [0 .. input & map y & maximum]
 
 
 main = do
