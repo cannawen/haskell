@@ -22,12 +22,21 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & map (\(p1, p2) -> squareSize p1 p2)
     & sort
     & last
-        
 
-part2 input = input
+
+pointSet p1 p2 = Set.fromList [Point x y | x <- [(x p1) .. (x p2)], y <- [(min (y p1) (y p2)) .. (max (y p1) (y p2))]]
+
+part2 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
+              & map (\(p1, p2) -> pointSet p1 p2)
+              & filter (\pointSet -> Set.disjoint pointSet (Set.fromList input))
+              & map Set.size
+              & sort
+              & last
+          
+          
 
 main = do
-    contents <- readFile "app/aoc/2025/9/input.txt"
+    contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
     print $ part1 $ parse contents
-    -- print $ part2 $ parse contents
+    print $ part2 $ parse contents
