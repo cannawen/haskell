@@ -59,7 +59,7 @@ oneInEach smallCircuit bigCircuitA bigCircuitB =
           p1 = head p
           p2 = last p
 
-part2 input = answer & length
+part2 input = answer & head 
 
     where combinations =
             [Set.fromList [p1, p2] | p1 <- input, p2 <- input, p1 /= p2]
@@ -75,17 +75,19 @@ part2 input = answer & length
             & sort
             & map (\(_, p1, p2) -> Circuit (Set.fromList [p1, p2]))
 
-          twoSeparateCircuits = scanl' merge Set.empty twoPointCircuits
-            & group & map head
+          setOfAllSingleCircuits = map (\p -> (Circuit (Set.singleton p))) input & Set.fromList
+
+          twoSeparateCircuits = scanl' merge setOfAllSingleCircuits twoPointCircuits
+            -- & group & map head
             & filter (\circuit -> Set.size circuit == 2)
             & last
         
           bigCircuitA = Set.toList twoSeparateCircuits & head
           bigCircuitB = Set.toList twoSeparateCircuits & last
 
-          pointsNotInEither = filter (\twoPoint -> notIn twoPoint bigCircuitA && notIn twoPoint bigCircuitB) twoPointCircuits
+        --   pointsNotInEither = filter (\twoPoint -> notIn twoPoint bigCircuitA && notIn twoPoint bigCircuitB) twoPointCircuits
 
-          answer = filter (\twoPoint -> oneInEach twoPoint bigCircuitA bigCircuitB) pointsNotInEither
+          answer = filter (\twoPoint -> oneInEach twoPoint bigCircuitA bigCircuitB) twoPointCircuits
 
 main = do
     contents <- readFile "app/aoc/2025/8/input.txt"
