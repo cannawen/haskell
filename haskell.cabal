@@ -63,4 +63,9 @@ executable 8
     build-depends:    split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
     hs-source-dirs:   app/aoc/2025/8
     default-language: Haskell2010
-    ghc-options:      -g
+
+executable 9
+    main-is:          aoc.hs
+    build-depends:    split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
+    hs-source-dirs:   app/aoc/2025/9
+    default-language: Haskell2010
