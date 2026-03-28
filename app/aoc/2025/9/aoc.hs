@@ -23,9 +23,18 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & sort
     & last
 
-part2 input = input
+rotate arr = tail arr ++ [head arr]
+
+part2 input = outlineSet
+    where outlineSet = 
+            zip input (rotate input)
+            & map (\(p1, p2) -> [Point x y | x <- [min (x p1) (x p2) .. max (x p1) (x p2)], y <- [min (y p1) (y p2) .. max (y p1) (y p2)]])
+            & concat
+            & Set.fromList
+
+
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
-    print $ part1 $ parse contents
+    -- print $ part1 $ parse contents
     print $ part2 $ parse contents
