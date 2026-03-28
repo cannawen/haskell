@@ -9,8 +9,6 @@ data Point = Point
     , y :: Double
     } deriving (Show, Eq, Ord)
 
-data Direction = L | R | U | D | Error deriving (Show, Eq)
-
 parse :: String -> [Point]
 parse input =
     lines input
@@ -25,18 +23,7 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & sort
     & last
 
-rotate arr = tail arr ++ [head arr]
-
-calculateOutVector (prev, curr, next)
-  | x prev == x curr && y prev < y curr = R
-  | x prev == x curr && y prev > y curr = L
-  | y prev == y curr && x prev < x curr = D
-  | y prev == y curr && x prev > x curr = U
-  | otherwise = Error
-
-part2 input = zip3 input (rotate input) (rotate $ rotate input)
-    & map calculateOutVector
-
+part2 input = input
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
