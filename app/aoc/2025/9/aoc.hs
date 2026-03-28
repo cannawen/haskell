@@ -16,7 +16,13 @@ parse input =
     & map (\point -> map read point)
     & map (\arr -> Point (head arr) (last arr))
 
-part1 input = input
+squareSize p1 p2 = (succ ((x p2) - (x p1))) * (succ ((y p2) - (y p1)))
+
+part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
+    & map (\(p1, p2) -> squareSize p1 p2)
+    & sort
+    & last
+        
 
 part2 input = input
 
