@@ -28,6 +28,12 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
 rotate arr = tail arr ++ [head arr]
 
 shouldSwitch input set x y = Set.member (Point x y) set -- && (not $ elem (Point x y) input)
+traverseRecur constraints 0 0 = [] 
+traverseRecur constraints x y = 
+    
+    (traverseRecur constraints (x-1) y) ++  (traverseRecur constraints (x-1) (y- 1)) ++  (traverseRecur constraints x (y - 1))
+
+traverse constraints maxX maxY = 
 
 part2 input = shape
     where outlineSet = 
