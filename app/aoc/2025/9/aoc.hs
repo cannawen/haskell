@@ -19,12 +19,16 @@ parse input =
     & map (\point -> map read point)
     & map (\arr -> Point (head arr) (last arr))
 
+-- Part 1 ----------------------------------------------------------------------------------------------------------------
+
 squareSize p1 p2 = (succ ((x p2) - (x p1))) * (succ ((y p2) - (y p1)))
 
 part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & map (\(p1, p2) -> squareSize p1 p2)
     & sort
     & last
+
+-- Part 2 (Brute force) ----------------------------------------------------------------------------------------------------------------
 
 rotate arr = tail arr ++ [head arr]
 
@@ -55,6 +59,8 @@ part2_brute input = shapeH
             ) 
             [0 .. input & map y & maximum]
 
+-- Part 2 (Ray Casting) ----------------------------------------------------------------------------------------------------------------
+
 isSquareInside (p1, p2) shape bounds = True
     where xMin = min (x p1) (x p2)
           xMax = max (x p1) (x p2)
@@ -79,8 +85,8 @@ part2 input = sortedSquares
     where sortedSquares = 
             [(squareSize p1 p2, p1, p2) | p1 <- input, p2 <- input, p1 < p2]
             & sort
-            & map (\(s, p1, p2) -> (p1, p2))
             & reverse
+            & map (\(s, p1, p2) -> (p1, p2))
           shapePoints = 
             zip input (rotate input)
             & map getStraightPointsBetween
@@ -96,7 +102,6 @@ part2 input = sortedSquares
             & last
           boundsPoints = getStraightPointsBetween (Point (-2) (-2), Point (2 + inputMaxX) (2 + inputMaxY))
         
-          
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
