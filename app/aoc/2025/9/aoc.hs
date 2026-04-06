@@ -55,14 +55,25 @@ part2_brute input = shapeH
             ) 
             [0 .. input & map y & maximum]
 
-isSquareInside (p1, p2) bounds = True
+isSquareInside (p1, p2) shape bounds = True
+    where xMin = min (x p1) (x p2)
+          xMax = max (x p1) (x p2)
+          xArray = [xMin .. xMax]
 
-getStraightPointsBetween (p1, p2) = [(x, y) | x <- [xMin, xMax], y <- [yMin .. yMax]] ++ [(x, y) | x <- [xMin .. xMax], y <- [yMin, yMax]]
+          yMin = min (y p1) (y p2)
+          yMax = max (y p1) (y p2)
+          yArray = [yMin .. yMax]
+
+          topPoints = [Point x yMin | x <- xArray]
+          rightPoints = [Point xMax y | y <- yArray]
+          bottomPoints = [Point x yMax | x <- xArray]
+          leftPoints = [Point xMin y | y <- yArray]
+
+getStraightPointsBetween (p1, p2) = [Point x y | x <- [xMin, xMax], y <- [yMin .. yMax]] ++ [Point x y | x <- [xMin .. xMax], y <- [yMin, yMax]] & Set.fromList
     where xMin = min (x p1) (x p2)
           xMax = max (x p1) (x p2)
           yMin = min (y p1) (y p2)
           yMax = max (y p1) (y p2)
-
 
 part2 input = sortedSquares
     where sortedSquares = 
@@ -70,11 +81,20 @@ part2 input = sortedSquares
             & sort
             & map (\(s, p1, p2) -> (p1, p2))
             & reverse
-          outlineSet = 
+          shapePoints = 
             zip input (rotate input)
             & map getStraightPointsBetween
-            & concat
-            & Set.fromList
+          inputMaxX = 
+            input 
+            & map x
+            & sort
+            & last
+          inputMaxY = 
+            input
+            & map y
+            & sort
+            & last
+          boundsPoints = getStraightPointsBetween (Point (-2) (-2), Point (2 + inputMaxX) (2 + inputMaxY))
         
           
 main = do
