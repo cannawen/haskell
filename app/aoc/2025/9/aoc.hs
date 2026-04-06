@@ -7,9 +7,10 @@ import qualified Data.Set as Set
 data Point = Point
     { x :: Int
     , y :: Int
-    } deriving (Show, Eq, Ord)
+    } deriving (Eq, Ord)
 
-data PlacedPoint = InPoint Point | OutPoint Point deriving (Show, Eq)
+instance Show Point where
+    show (Point {x=x, y=y}) = "(" ++ show x ++ "," ++ show y ++ ")"
 
 parse :: String -> [Point]
 parse input =
@@ -28,14 +29,8 @@ part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
 rotate arr = tail arr ++ [head arr]
 
 shouldSwitch input set x y = Set.member (Point x y) set -- && (not $ elem (Point x y) input)
-traverseRecur constraints 0 0 = [] 
-traverseRecur constraints x y = 
-    
-    (traverseRecur constraints (x-1) y) ++  (traverseRecur constraints (x-1) (y- 1)) ++  (traverseRecur constraints x (y - 1))
 
-traverse constraints maxX maxY = 
-
-part2 input = shape
+part2_brute input = shapeH
     where outlineSet = 
             zip input (rotate input)
             & map (\(p1, p2) -> [Point x y | x <- [min (x p1) (x p2) .. max (x p1) (x p2)], y <- [min (y p1) (y p2) .. max (y p1) (y p2)]])
@@ -48,7 +43,7 @@ part2 input = shape
             & concat
             & Set.fromList
           grid = [Point x y | x <- [0 .. input & map x & maximum], y <- [0 .. input & map y & maximum]]
-          shape = 
+          shapeH = 
             map 
             (\y -> 
                 foldl' 
@@ -60,7 +55,28 @@ part2 input = shape
             ) 
             [0 .. input & map y & maximum]
 
+isSquareInside (p1, p2) bounds = True
 
+getStraightPointsBetween (p1, p2) = [(x, y) | x <- [xMin, xMax], y <- [yMin .. yMax]] ++ [(x, y) | x <- [xMin .. xMax], y <- [yMin, yMax]]
+    where xMin = min (x p1) (x p2)
+          xMax = max (x p1) (x p2)
+          yMin = min (y p1) (y p2)
+          yMax = max (y p1) (y p2)
+
+
+part2 input = sortedSquares
+    where sortedSquares = 
+            [(squareSize p1 p2, p1, p2) | p1 <- input, p2 <- input, p1 < p2]
+            & sort
+            & map (\(s, p1, p2) -> (p1, p2))
+            & reverse
+          outlineSet = 
+            zip input (rotate input)
+            & map getStraightPointsBetween
+            & concat
+            & Set.fromList
+        
+          
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
