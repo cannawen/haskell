@@ -58,6 +58,12 @@ executable 7.2
     hs-source-dirs:   app/aoc/2025/7.2
     default-language: Haskell2010
 
+executable 7.3
+    main-is:          aoc.hs
+    build-depends:    vector ^>=0.13.2.0, text ^>=2.0.2, split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5, pretty-show ^>=1.10,
+    hs-source-dirs:   app/aoc/2025/7.3
+    default-language: Haskell2010
+
 executable 8
     main-is:          aoc.hs
     build-depends:    split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
