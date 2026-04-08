@@ -68,6 +68,7 @@ part2_brute input = shapeH
             [0 .. input & map y & maximum]
 
 -- Part 2 (Ray Casting) ----------------------------------------------------------------------------------------------------------------
+
 type LineSegment = (Point, Point)
 type Square = (Point, Point)
 
@@ -95,7 +96,28 @@ isSquareInside square shape maxX =
   && isPointInside (bottomRight square) shape maxX
 
 isPointInside :: Point -> [LineSegment] -> Int -> Bool
-isPointInside point shape maxX = True
+isPointInside point lines maxX = odd (countOfLineCrossings point lines maxX)
+
+pointInLine :: Point -> LineSegment -> Int
+pointInLine point (p1, p2) =
+  if (xMin == xMax && xP == xMin && yP >= yMin && yP <= yMax) || (yMin == yMax && yP == yMin && xP >= xMin && xP <= xMax)
+    then 1
+    else 0
+  where 
+    xP = x point
+    yP = y point
+    xMin = min (x p1) (x p2)
+    xMax = max (x p1) (x p2)
+    yMin = min (y p1) (y p2)
+    yMax = max (y p1) (y p2)
+
+touchingLine :: [LineSegment] -> Point -> Int
+touchingLine lines point = foldl' (\memo line -> pointInLine point line + memo) 0 lines
+
+countOfLineCrossings :: Point -> [LineSegment] -> Int -> Int
+countOfLineCrossings point lines maxX = 
+  [Point x (y point)| x <- [(x point) .. maxX]]
+  & map (touchingLine lines)
 
 squareEdgesNoIntersectingShapeEdges :: Square -> [LineSegment] -> Int -> Bool
 squareEdgesNoIntersectingShapeEdges square shape maxX = True
