@@ -29,7 +29,7 @@ parse input =
 
 -- Part 1 ----------------------------------------------------------------------------------------------------------------
 
-squareSize p1 p2 = (succ ((x p2) - (x p1))) * (succ ((y p2) - (y p1)))
+squareSize p1 p2 =  succ ((p1 - p2) & x & abs) * (succ ((p1 - p2) & y & abs))
 
 part1 input = [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & map (\(p1, p2) -> squareSize p1 p2)
@@ -68,67 +68,29 @@ part2_brute input = shapeH
             [0 .. input & map y & maximum]
 
 -- Part 2 (Ray Casting) ----------------------------------------------------------------------------------------------------------------
+type LineSegment = (Point, Point)
+type Square = (Point, Point)
 
-crossings :: Int -> Point -> Point -> Set.Set Point -> Set.Set Point -> Int
-crossings count p dir shape bounds
-  | outOfBounds = count
-  | countIncrement = crossings (succ count) (p + dir) dir shape bounds
-  | otherwise = crossings count (p + dir) dir shape bounds
-  where
-      outOfBounds = Set.member p bounds
-      countIncrement = Set.member p shape
+shapeCoords :: [Point] -> [LineSegment]
+shapeCoords input = zip input (rotate input)
 
-isSquareInside (p1, p2) shape bounds = allCrossings & map odd & foldl1' (&&)
-    where xMin = min (x p1) (x p2)
-          xMax = max (x p1) (x p2)
-          xArray = [xMin .. xMax]
-
-          yMin = min (y p1) (y p2)
-          yMax = max (y p1) (y p2)
-          yArray = [yMin .. yMax]
-
-          topPoints = [Point x yMin | x <- xArray]
-          rightPoints = [Point xMax y | y <- yArray]
-          bottomPoints = [Point x yMax | x <- xArray]
-          leftPoints = [Point xMin y | y <- yArray]
-
-          topCrossings = topPoints & map (\p -> crossings 0 p (Point 0 (-1)) shape bounds)
-          rightCrossings = rightPoints & map (\p -> crossings 0 p (Point 1 0) shape bounds)
-          bottomCrossings = bottomPoints & map (\p -> crossings 0 p (Point 0 1) shape bounds)
-          leftCrossings = topPoints & map (\p -> crossings 0 p (Point (-1) 0) shape bounds)
-
-          allCrossings = topCrossings ++ rightCrossings ++ bottomCrossings ++ leftCrossings
-
-getStraightPointsBetween (p1, p2) = [Point x y | x <- [xMin, xMax], y <- [yMin .. yMax]] ++ [Point x y | x <- [xMin .. xMax], y <- [yMin, yMax]] & Set.fromList
-    where xMin = min (x p1) (x p2)
-          xMax = max (x p1) (x p2)
-          yMin = min (y p1) (y p2)
-          yMax = max (y p1) (y p2)
+isSquareInside :: Square -> [LineSegment] -> Int -> Bool
+isSquareInside square shape maxX = True
 
 part2 input = 
-    sortedSquares &
-    filter (\square -> isSquareInside square shapePoints boundsPoints)
+    sortedSquares
+    & filter (\square -> isSquareInside square (shapeCoords input) inputMaxX)
 
     where sortedSquares =
             [(squareSize p1 p2, p1, p2) | p1 <- input, p2 <- input, p1 < p2]
             & sort
             & reverse
             & map (\(s, p1, p2) -> (p1, p2))
-          shapePoints =
-            zip input (rotate input)
-            & map getStraightPointsBetween
-            & foldl1' Set.union
           inputMaxX =
             input
             & map x
             & sort
             & last
-          inputMaxY =
-            input
-            & map y
-            & sort
-            & last
-          boundsPoints = getStraightPointsBetween (Point (-2) (-2), Point (2 + inputMaxX) (2 + inputMaxY))
 
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
