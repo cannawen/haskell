@@ -71,11 +71,37 @@ part2_brute input = shapeH
 type LineSegment = (Point, Point)
 type Square = (Point, Point)
 
-shapeCoords :: [Point] -> [LineSegment]
-shapeCoords input = zip input (rotate input)
+topLeft :: Square -> Point
+topLeft square = getPointOnSquare square min min
+
+topRight :: Square -> Point
+topRight square = getPointOnSquare square min max
+
+bottomLeft :: Square -> Point
+bottomLeft square = getPointOnSquare square max min
+
+bottomRight :: Square -> Point
+bottomRight square = getPointOnSquare square max max
+
+getPointOnSquare :: Square -> (Int -> Int -> Int) -> (Int -> Int -> Int) -> Point
+getPointOnSquare (p1, p2) xFn yFn = Point (xFn (x p1) (x p2)) (yFn (y p1) (y p2))
 
 isSquareInside :: Square -> [LineSegment] -> Int -> Bool
-isSquareInside square shape maxX = True
+isSquareInside square shape maxX = 
+  squareEdgesNoIntersectingShapeEdges square shape maxX
+  && isPointInside (topLeft square) shape maxX
+  && isPointInside (topRight square) shape maxX
+  && isPointInside (bottomLeft square) shape maxX
+  && isPointInside (bottomRight square) shape maxX
+
+isPointInside :: Point -> [LineSegment] -> Int -> Bool
+isPointInside point shape maxX = True
+
+squareEdgesNoIntersectingShapeEdges :: Square -> [LineSegment] -> Int -> Bool
+squareEdgesNoIntersectingShapeEdges square shape maxX = True
+
+shapeCoords :: [Point] -> [LineSegment]
+shapeCoords input = zip input (rotate input)
 
 part2 input = 
     sortedSquares
@@ -86,11 +112,7 @@ part2 input =
             & sort
             & reverse
             & map (\(s, p1, p2) -> (p1, p2))
-          inputMaxX =
-            input
-            & map x
-            & sort
-            & last
+          inputMaxX = map x input & maximum
 
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
