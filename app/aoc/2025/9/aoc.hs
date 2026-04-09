@@ -87,34 +87,27 @@ bottomRight square = getPointOnSquare square max max
 getPointOnSquare :: Square -> (Int -> Int -> Int) -> (Int -> Int -> Int) -> Point
 getPointOnSquare (p1, p2) xFn yFn = Point (xFn (x p1) (x p2)) (yFn (y p1) (y p2))
 
-rayToRight :: Point -> Int -> LineSegment
-rayToRight point xMax = (Point (x point) (y point), Point xMax (y point))
+lineToRight :: Point -> Int -> LineSegment
+lineToRight point xMax = (Point (x point) (y point), Point xMax (y point))
 
 isSquareInside :: Square -> [LineSegment] -> Int -> Bool
 isSquareInside square shape xMax =
   squareEdgesNoIntersectingShapeEdges square shape xMax
-  && (numRaysCrossed (rayToRight (topLeft square) xMax) shape & odd)
-  && (numRaysCrossed (rayToRight (topRight square) xMax) shape & odd)
-  && (numRaysCrossed (rayToRight (bottomLeft square) xMax) shape & odd)
-  && (numRaysCrossed (rayToRight (bottomRight square) xMax) shape & odd)
+  && (numLinesCrossed (lineToRight (topLeft square) xMax) shape & odd)
+  && (numLinesCrossed (lineToRight (topRight square) xMax) shape & odd)
+  && (numLinesCrossed (lineToRight (bottomLeft square) xMax) shape & odd)
+  && (numLinesCrossed (lineToRight (bottomRight square) xMax) shape & odd)
 
 intersection :: LineSegment -> LineSegment -> Bool
-intersection (pA1, pA2) (pB1, pB2) =
-  (bXMin <= aXMax && aXMax <= bXMax && aYMin <= bYMax && bYMax <= aYMax) 
-  || (aXMin <= bXMin && bXMin <= bXMax && bYMin <= aYMin && aYMin <= bYMax)
+intersection (horizontalLinePoint1, horizontalLinePoint2) (linePoint1, linePoint2) =
+  True
   -- TODO this is wrong
   where 
-    aXMin = min (x pA1) (x pA2)
-    aXMax = max (x pA1) (x pA2)
-    aYMin = min (y pA1) (y pA2)
-    aYMax = max (y pA1) (y pA2)
-    bXMin = min (x pB1) (x pB2)
-    bXMax = max (x pB1) (x pB2)
-    bYMin = min (y pB1) (y pB2)
-    bYMax = max (y pB1) (y pB2)
+    rayY = y horizontalLinePoint1
+    
 
-numRaysCrossed :: LineSegment -> [LineSegment] -> Int
-numRaysCrossed ray shape = map (intersection ray) shape & map (\b -> if b then 1 else 0) & sum
+numLinesCrossed :: LineSegment -> [LineSegment] -> Int
+numLinesCrossed line shape = map (intersection line) shape & map (\b -> if b then 1 else 0) & sum
 
 squareEdgesNoIntersectingShapeEdges :: Square -> [LineSegment] -> Int -> Bool
 squareEdgesNoIntersectingShapeEdges square shape xMax = True -- TODO
