@@ -87,40 +87,37 @@ bottomRight square = getPointOnSquare square max max
 getPointOnSquare :: Square -> (Int -> Int -> Int) -> (Int -> Int -> Int) -> Point
 getPointOnSquare (p1, p2) xFn yFn = Point (xFn (x p1) (x p2)) (yFn (y p1) (y p2))
 
+rayToRight :: Point -> Int -> LineSegment
+rayToRight point xMax = (Point (x point) (y point), Point xMax (y point))
+
 isSquareInside :: Square -> [LineSegment] -> Int -> Bool
-isSquareInside square shape maxX = 
-  squareEdgesNoIntersectingShapeEdges square shape maxX
-  && isPointInside (topLeft square) shape maxX
-  && isPointInside (topRight square) shape maxX
-  && isPointInside (bottomLeft square) shape maxX
-  && isPointInside (bottomRight square) shape maxX
+isSquareInside square shape xMax =
+  squareEdgesNoIntersectingShapeEdges square shape xMax
+  && (numRaysCrossed (rayToRight (topLeft square) xMax) shape & odd)
+  && (numRaysCrossed (rayToRight (topRight square) xMax) shape & odd)
+  && (numRaysCrossed (rayToRight (bottomLeft square) xMax) shape & odd)
+  && (numRaysCrossed (rayToRight (bottomRight square) xMax) shape & odd)
 
-isPointInside :: Point -> [LineSegment] -> Int -> Bool
-isPointInside point lines maxX = odd (countOfLineCrossings point lines maxX)
-
-pointInLine :: Point -> LineSegment -> Int
-pointInLine point (p1, p2) =
-  if (xMin == xMax && xP == xMin && yP >= yMin && yP <= yMax) || (yMin == yMax && yP == yMin && xP >= xMin && xP <= xMax)
-    then 1
-    else 0
+intersection :: LineSegment -> LineSegment -> Bool
+intersection (pA1, pA2) (pB1, pB2) =
+  (bXMin <= aXMax && aXMax <= bXMax && aYMin <= bYMax && bYMax <= aYMax) 
+  || (aXMin <= bXMin && bXMin <= bXMax && bYMin <= aYMin && aYMin <= bYMax)
+  -- TODO this is wrong
   where 
-    xP = x point
-    yP = y point
-    xMin = min (x p1) (x p2)
-    xMax = max (x p1) (x p2)
-    yMin = min (y p1) (y p2)
-    yMax = max (y p1) (y p2)
+    aXMin = min (x pA1) (x pA2)
+    aXMax = max (x pA1) (x pA2)
+    aYMin = min (y pA1) (y pA2)
+    aYMax = max (y pA1) (y pA2)
+    bXMin = min (x pB1) (x pB2)
+    bXMax = max (x pB1) (x pB2)
+    bYMin = min (y pB1) (y pB2)
+    bYMax = max (y pB1) (y pB2)
 
-touchingLine :: [LineSegment] -> Point -> Int
-touchingLine lines point = foldl' (\memo line -> pointInLine point line + memo) 0 lines
-
-countOfLineCrossings :: Point -> [LineSegment] -> Int -> Int
-countOfLineCrossings point lines maxX = 
-  [Point x (y point)| x <- [(x point) .. maxX]]
-  & map (touchingLine lines)
+numRaysCrossed :: LineSegment -> [LineSegment] -> Int
+numRaysCrossed ray shape = map (intersection ray) shape & map (\b -> if b then 1 else 0) & sum
 
 squareEdgesNoIntersectingShapeEdges :: Square -> [LineSegment] -> Int -> Bool
-squareEdgesNoIntersectingShapeEdges square shape maxX = True
+squareEdgesNoIntersectingShapeEdges square shape xMax = True -- TODO
 
 shapeCoords :: [Point] -> [LineSegment]
 shapeCoords input = zip input (rotate input)
