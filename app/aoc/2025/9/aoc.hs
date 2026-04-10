@@ -98,14 +98,35 @@ isSquareInside square shape xMax =
   && (numLinesCrossed (lineToRight (bottomLeft square) xMax) shape & odd)
   && (numLinesCrossed (lineToRight (bottomRight square) xMax) shape & odd)
 
-intersection :: LineSegment -> LineSegment -> Bool
-intersection (horizontalLinePoint1, horizontalLinePoint2) (linePoint1, linePoint2) =
-  True
-  -- TODO this is wrong
-  where 
-    rayY = y horizontalLinePoint1
-    
+isPointOnBounds :: Point -> [LineSegment] -> Bool
+isPointOnBounds p bounds = foldl' (\m (l1, l2) -> m
+    || (x l1 == x l2 && x p == x l1 && y p <= max (y l1) (y l2) && y p >= min (y l1) (y l2))
+    || (y l1 == y l2 && y p == y l1 && x p <= max (x l1) (x l2) && x p >= min (x l1) (x l2))
+    ) False bounds
 
+intersection :: LineSegment -> LineSegment -> Bool
+intersection horizontal line =
+  if x (fst line) == x (snd line)
+    then verticalIntersection horizontal (lowToHighVertical line)
+    else horizontalIntersection horizontal (lowToHighHorizontal line)
+  where 
+    lowToHighVertical (p1, p2) = (Point (x p1) (min (y p1) (y p2)), Point (x p1) (max (y p1) (y p2)))
+    lowToHighHorizontal (p1, p2) = (Point (min (x p1) (x p2)) (y p1), Point (max (x p1) (x p2)) (y p1))
+
+    verticalIntersection horizontal vertical = 
+        x (fst horizontal) <= x (fst vertical) 
+        && x (fst vertical) <= x (snd horizontal) 
+        && y (fst vertical) <= y (fst horizontal)
+        && y (fst horizontal) <= y (snd vertical)
+    horizontalIntersection horizontal line = 
+        y (fst horizontal) == y (fst line)
+        && oneDIntersection (x (fst horizontal)) (x (snd horizontal)) (x (fst line)) (x (snd line))
+    oneDIntersection min1 max1 min2 max2 =
+        (min1 <= max2 && max2 <= max1)
+        || (min1 <= min2 && min2 <= max1)
+        || (min2 <= min1 && max2 >= max1)
+        || (min2 >= min1 && max2 <= max1)
+        
 numLinesCrossed :: LineSegment -> [LineSegment] -> Int
 numLinesCrossed line shape = map (intersection line) shape & map (\b -> if b then 1 else 0) & sum
 
