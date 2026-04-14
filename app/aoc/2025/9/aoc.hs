@@ -152,18 +152,23 @@ shapeCoords :: [Point] -> [LineSegment]
 shapeCoords input = zip input (rotate input)
 
 part2 input = 
-    sortedSquares
+    sortedSquares input
     & filter (\square -> isSquareInside square (shapeCoords input) inputMaxX)
+    where
+        inputMaxX = map x input & maximum
 
-    where sortedSquares =
+sortedSquares :: [Point] -> [(Point, Point)]      
+sortedSquares input =
             [(squareSize p1 p2, p1, p2) | p1 <- input, p2 <- input, p1 < p2]
             & sort
             & reverse
             & map (\(s, p1, p2) -> (p1, p2))
-          inputMaxX = map x input & maximum
+
 
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
     -- print $ part1 $ parse contents
     print $ part2 $ parse contents
+
+exampleInput = parse <$> readFile "app/aoc/2025/9/input-mini.txt"
