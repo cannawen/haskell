@@ -1,0 +1,3 @@
+go skydiving
+snorkling
+mountain climbing
