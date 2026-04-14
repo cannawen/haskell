@@ -7,22 +7,26 @@ main = deleteTodo
 deleteTodo = do
     putStrLn "Which item would you like to delete?"
     numberString <- getLine
-    contents <- readFile "todo.txt"
     
-    _ <- evaluate (length contents)
-    
-    let items = zip [0..] (lines contents)
-    let numberedItems = filter (\(i, item) -> i /= read numberString) items & map snd
-    
-    writeFile "todo.txt" (unlines numberedItems)
+    withFile "todo.txt" ReadWriteMode (\handle -> do
+        contents <- hGetContents handle
+        _ <- evaluate (length contents)
+
+        let items = zip [0..] (lines contents)
+        let numberedItems = filter (\(i, item) -> i /= read numberString) items & map snd
+
+        mapM_ (hPutStrLn handle) numberedItems)
 
 printTodo = do
-    contents <- readFile "todo.txt"
-    let items = zip [0..] (lines contents)
-    let numberedItems = map (\(i, item) -> show i ++ " - " ++ item) items
-    mapM_ putStrLn numberedItems
+    withFile "todo.txt" ReadMode (\handle -> do
+        contents <- hGetContents handle
+        let items = zip [0..] (lines contents)
+        let numberedItems = map (\(i, item) -> show i ++ " - " ++ item) items
+        mapM_ putStrLn numberedItems)
+
 
 addTodo = do 
     todoItem <- getLine
-    appendFile "todo.txt" (todoItem ++ "\n")
+    withFile "todo.txt" AppendMode (\handle -> do
+        hPutStrLn handle todoItem)
 
