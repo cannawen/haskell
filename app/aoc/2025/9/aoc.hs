@@ -90,13 +90,20 @@ getPointOnSquare (p1, p2) xFn yFn = Point (xFn (x p1) (x p2)) (yFn (y p1) (y p2)
 lineToRight :: Point -> Int -> LineSegment
 lineToRight point xMax = (Point (x point) (y point), Point xMax (y point))
 
+allPointsBordering :: Square -> [Point]
+allPointsBordering (p1, p2) = 
+    [Point xMin y | y <- [yMin .. yMax]]
+    ++ [Point xMax y | y <- [yMin .. yMax]]
+    ++ [Point x yMin | x <- [xMin .. xMax]]
+    ++ [Point x yMax | x <- [xMin .. xMax]]
+  where 
+    xMin = min (x p1) (x p2)
+    xMax = max (x p1) (x p2)
+    yMin = min (y p1) (y p2)
+    yMax = max (y p1) (y p2)
+
 isSquareInside :: Square -> [LineSegment] -> Int -> Bool
-isSquareInside square shape xMax =
-  squareEdgesNoIntersectingShapeEdges square shape xMax
-  && (numLinesCrossed (lineToRight (topLeft square) xMax) shape & odd)
-  && (numLinesCrossed (lineToRight (topRight square) xMax) shape & odd)
-  && (numLinesCrossed (lineToRight (bottomLeft square) xMax) shape & odd)
-  && (numLinesCrossed (lineToRight (bottomRight square) xMax) shape & odd)
+isSquareInside square shape xMax = foldl' (\memo p -> memo && isInShape p xMax shape) True (allPointsBordering square)
 
 isPointOnBounds :: Point -> [LineSegment] -> Bool
 isPointOnBounds p bounds = foldl' (\m (l1, l2) -> m
@@ -130,8 +137,16 @@ intersection horizontal line =
 numLinesCrossed :: LineSegment -> [LineSegment] -> Int
 numLinesCrossed line shape = map (intersection line) shape & map (\b -> if b then 1 else 0) & sum
 
-squareEdgesNoIntersectingShapeEdges :: Square -> [LineSegment] -> Int -> Bool
-squareEdgesNoIntersectingShapeEdges square shape xMax = True -- TODO
+isOnBorder :: Point -> [LineSegment] -> Bool
+isOnBorder p shape = 
+    any (\(p1, p2) -> min (y p1) (y p2) <= y p && y p <= max (y p1) (y p2)) vertical
+    || any (\(p1, p2) -> min (x p1) (x p2) <= x p && x p <= max (x p1) (x p2)) horizontal
+    where
+        vertical = filter (\(p1, p2) -> x p1 == x p2 && x p == x p1) shape
+        horizontal = filter (\(p1, p2) -> y p1 == y p2 && y p == y p1) shape
+
+isInShape :: Point -> Int -> [LineSegment] -> Bool
+isInShape point xMax shape = isOnBorder point shape || odd (numLinesCrossed (lineToRight point xMax)  shape)
 
 shapeCoords :: [Point] -> [LineSegment]
 shapeCoords input = zip input (rotate input)
