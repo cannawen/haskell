@@ -13,16 +13,12 @@ main = do
 isInt :: String -> Bool
 isInt s = isJust (readMaybe s :: Maybe Int)
 
-calculate :: String -> [Int] -> [Int]
-calculate "+" (a:b:ns) = (b + a):ns
-calculate "-" (a:b:ns) = (b - a):ns
-calculate "*" (a:b:ns) = (b * a):ns
-calculate "/" (a:b:ns) = div b a:ns
-calculate _ (a:b:ns) = ns
+calculate ::[Int] -> String ->  [Int]
+calculate (a:b:ns) "+" = (b + a):ns
+calculate (a:b:ns) "-" = (b - a):ns
+calculate (a:b:ns) "*"  = (b * a):ns
+calculate (a:b:ns) "/" = div b a:ns
+calculate ns numberSting = read numberSting:ns
 
 rpn :: String -> Int
-rpn args = foldl (\memo token ->
-    if isInt token
-        then read token : memo
-        else calculate token memo ) [] (words args)
-    & head
+rpn args = foldl calculate [] (words args) & head
