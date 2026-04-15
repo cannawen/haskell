@@ -4,34 +4,22 @@ import System.Environment
 import Text.Read
 import Text.Read.Lex (Number)
 
-data Road = A Int | B Int | C Int | AC Int | BC Int | Invalid deriving (Show)
+data Road = A Int | B Int | C Int deriving (Show)
 
-roadNum (A n)  = Just n
-roadNum (B n)  = Just n
-roadNum (C n)  = Just n
-roadNum (AC n) = Just n
-roadNum (BC n) = Just n
-roadNum Invalid = Nothing
-
-instance Num Road where
-    (+) (A a) (C c) = AC (a+c)
-    (+) (B b) (C c) = BC (b+c)
-    (+) _ _ = Invalid
-    (-) _ _ = Invalid
-    (*) _ _ = Invalid
-    negate _ = Invalid
-    abs _ = Invalid
-    signum _ = Invalid
-    fromInteger _ = Invalid
+roadNum (A n)  = n
+roadNum (B n)  = n
+roadNum (C n)  = n
 
 instance Eq Road where
     (==) r1 r2 = roadNum r1 == roadNum r2
-
 
 instance Ord Road where
     compare r1 r2 = compare (roadNum r1) (roadNum r2)
 
 type Segment = (Road, Road, Road)
+
+type ShortestPathToA = [Road]
+type ShortestPathToB = [Road]
 
 a = map A [50, 5, 40, 10]
 b = map B [10, 90, 2, 8]
@@ -40,14 +28,27 @@ c = map C [30, 20, 25, 0]
 segments :: [Road] -> [Road] -> [Road] -> [Segment]
 segments = zip3
 
-fastestPathToA :: Segment -> Road
-fastestPathToA (a, b, c) = min a (b + c)
+pathLength :: [Road] -> Int
+pathLength roads = foldl (\m r -> m + roadNum r) 0 roads
 
-fastestPathToB :: Segment -> Road
-fastestPathToB (a, b, c) = min b (a + c)
+fastestPathToA :: (ShortestPathToA, ShortestPathToB) -> Segment -> ShortestPathToA
+fastestPathToA path (a, b, c) = 
+    if roadNum a + pathLength (fst path) < roadNum b + roadNum c + pathLength (snd path)
+        then a : fst path
+        else c : b : snd path
 
-segmentTuples = foldl (\memo segment ->  (fastestPathToA segment, fastestPathToB segment) : memo) [] (segments a b c)
+fastestPathToB :: (ShortestPathToA, ShortestPathToB) -> Segment -> ShortestPathToB
+fastestPathToB path (a, b, c) = 
+    if roadNum b + pathLength (snd path) < roadNum a + roadNum c + pathLength (fst path)
+        then b : snd path
+        else c : a : fst path
+
+--  B 10,  C 30,  A 5,  C 20,  B2,  B 8
+segmentTuples = foldl 
+    (\memo segment -> (fastestPathToA memo segment, fastestPathToB memo segment))
+    ([A 0], [B 0]) (segments a b c)
 
 main = do
-    print $ segmentTuples
+    print $ reverse (fst segmentTuples) 
+    print $ reverse (snd segmentTuples) 
 
