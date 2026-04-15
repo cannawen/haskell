@@ -1,19 +1,25 @@
-data Road = A Int | B Int | C Int deriving (Show)
+data Road a = A a | B a | C a deriving (Show)
+
+instance Functor Road where 
+    fmap :: (a -> b) -> Road a -> Road b
+    fmap f (A n) = A (f n)
+    fmap f (B n) = B (f n)
+    fmap f (C n) = C (f n)
 
 roadNum (A n)  = n
 roadNum (B n)  = n
 roadNum (C n)  = n
 
-type Segment = (Road, Road, Road)
+type Segment = (Road Int, Road Int, Road Int)
 
-type ShortestPathToA = [Road]
-type ShortestPathToB = [Road]
+type ShortestPathToA = [Road Int]
+type ShortestPathToB = [Road Int]
 
 a = map A [50, 5, 40, 10]
 b = map B [10, 90, 2, 8]
 c = map C [30, 20, 25, 0]
 
-pathLength :: [Road] -> Int
+pathLength :: [Road Int] -> Int
 pathLength = foldl (\m r -> m + roadNum r) 0
 
 fastestPathToA :: (ShortestPathToA, ShortestPathToB) -> Segment -> ShortestPathToA
