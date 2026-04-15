@@ -21,7 +21,8 @@ calculate "/" a b = div a b
 calculate _ a b = 0
 
 rpn :: String -> Int
-rpn args = foldl (\memo token -> 
-    if isInt token 
-        then read token : memo 
-        else calculate token (memo !! 1) (head memo) : (drop 2 memo) ) [] (words args) !! 0
+rpn args = foldl (\memo token ->
+    if isInt token
+        then read token : memo
+        else calculate token (memo !! 1) (head memo) : drop 2 memo ) [] (words args)
+    & head
