@@ -31,8 +31,10 @@ operationMap = M.fromList
         ("mul", (\a b -> a * b))
     ]
 
-getFunctionFromName :: String -> Result String (Int -> Int -> Int)
-getFunctionFromName name = maybe (Fail ("operation " ++ name ++ " not found")) Success (M.lookup name operationMap)
+-- getFunctionFromName :: String -> Result String (Int -> Int -> Int)
+-- getFunctionFromName name = maybe (Fail ("operation " ++ name ++ " not found")) Success (M.lookup name operationMap)
+-- getFunctionFromName :: String -> Maybe (Int -> Int -> Int)
+getFunctionFromName name = M.lookup name operationMap
 
 numberMap :: M.Map String Int
 numberMap = M.fromList
@@ -42,10 +44,13 @@ numberMap = M.fromList
         ("three", 3)
     ]
 
-getNumberFromName :: String -> Result String Int
-getNumberFromName name = maybe (Fail ("number " ++ name ++ " not found")) Success (M.lookup name numberMap)
+-- getNumberFromName :: String -> Result String Int
+-- getNumberFromName name = maybe (Fail ("number " ++ name ++ " not found")) Success (M.lookup name numberMap)
+-- getNumberFromName :: String -> Maybe Int
+getNumberFromName name = M.lookup name numberMap
 
-calculate :: String -> String-> String -> Result String Int
+-- calculate :: String -> String-> String -> Result String Int
+-- calculate :: String -> String-> String -> Maybe Int
 calculate operationName numberName1 numberName2 = 
 
     let operation = getFunctionFromName operationName
