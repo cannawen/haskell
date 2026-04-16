@@ -1,4 +1,27 @@
+{-# LANGUAGE PatternSynonyms #-}
 import qualified Data.Map as M
+type Result e a = Either e a
+pattern Fail e = Left e
+pattern Success a = Right a
+
+
+
+
+
+
+
+--------------------- ignore above; not important -------------------------
+
+
+
+
+
+
+
+
+
+
+
 
 operationMap :: M.Map String (Int -> Int -> Int)
 operationMap = M.fromList 
@@ -8,8 +31,8 @@ operationMap = M.fromList
         ("mul", (\a b -> a * b))
     ]
 
-getFunctionFromName :: String -> Maybe (Int -> Int -> Int)
-getFunctionFromName name = M.lookup name operationMap
+getFunctionFromName :: String -> Result String (Int -> Int -> Int)
+getFunctionFromName name = maybe (Fail ("operation " ++ name ++ " not found")) Success (M.lookup name operationMap)
 
 numberMap :: M.Map String Int
 numberMap = M.fromList
@@ -19,10 +42,10 @@ numberMap = M.fromList
         ("three", 3)
     ]
 
-getNumberFromName :: String -> Maybe Int
-getNumberFromName name = M.lookup name numberMap
+getNumberFromName :: String -> Result String Int
+getNumberFromName name = maybe (Fail ("number " ++ name ++ " not found")) Success (M.lookup name numberMap)
 
-calculate :: String -> String-> String -> Maybe Int
+calculate :: String -> String-> String -> Result String Int
 calculate operationName numberName1 numberName2 = 
 
     let operation = getFunctionFromName operationName
