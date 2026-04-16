@@ -29,3 +29,12 @@ getIds :: [User] -> [Int]
 getIds users = [userId u | u <- users]
 
 liftedGetIds users = fmap userId users
+
+getLen :: Foldable t => t a -> Int
+getLen = length
+
+doubleLen :: Foldable t => t a -> Int
+doubleLen = fmap (*2) length
+
+timesTwo :: (Functor f, Num b) => f b -> f b
+timesTwo = fmap (*2)
