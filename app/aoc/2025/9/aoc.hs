@@ -2,6 +2,7 @@ import Data.Function ((&))
 import Data.List.Split
 import Data.List
 import qualified Data.Set as Set
+import Data.Ord
 
 -- type Point = (Int, Int, Int)
 data Point = Point
@@ -70,46 +71,64 @@ part2_brute input = shapeH
 -- Part 2 (Ray Casting) ----------------------------------------------------------------------------------------------------------------
 
 type LineSegment = (Point, Point)
-type Square = (Point, Point)
 
-topLeft :: Square -> Point
-topLeft square = getPointOnSquare square min min
+data Square = Square
+    { xMin :: Int
+    , yMin :: Int
+    , xMax :: Int
+    , yMax :: Int
+    } deriving (Eq)
 
-topRight :: Square -> Point
-topRight square = getPointOnSquare square min max
+instance Ord Square where
+    compare = comparing (\s -> (xMax s - xMin s) * (yMax s - yMin s))
 
-bottomLeft :: Square -> Point
-bottomLeft square = getPointOnSquare square max min
+makeSquare :: Point -> Point -> Square
+makeSquare (p1x, p1y) (p2x, p2y) = 
+    Square { 
+        xMin = min p1x p2x
+        yMin = min p1y p2y
+        xMax = max p1x p2x
+        yMax = max p1y p2y
+    }
 
-bottomRight :: Square -> Point
-bottomRight square = getPointOnSquare square max max
+insetSquare :: Square -> Square
+insetSquare s = Square {
+    xMin = succ (xMin s)
+    yMin = succ (yMin s)
+    xMax = pred (xMax x)
+    yMax = pred (yMax s)
+}
 
-getPointOnSquare :: Square -> (Int -> Int -> Int) -> (Int -> Int -> Int) -> Point
-getPointOnSquare (p1, p2) xFn yFn = Point (xFn (x p1) (x p2)) (yFn (y p1) (y p2))
+allPointsBordering :: Square -> Set.Set Point
+allPointsBordering s = 
+    [Point xMin y | y <- [(yMin s) .. (yMax s)]]
+    ++ [Point xMax y | y <- [(yMin s) .. (yMax s)]]
+    ++ [Point x yMin | x <- [(xMin s) .. (xMax s)]]
+    ++ [Point x yMax | x <- [(xMin s) .. (xMax s)]]
+    & Set.fromList
+
+middleSquare :: Square -> Point
+middleSquare s = Point
+    (xMin s + xMax s) `div` 2
+    (yMin s + yMax s) `div` 2
+
+allBorderPoints :: [LineSegment] -> Set.Set Point
+allBorderPoints s = map (allPointsBordering . makeSquare) s & Set.unions
 
 lineToRight :: Point -> Int -> LineSegment
 lineToRight point xMax = (Point (x point) (y point), Point xMax (y point))
 
-allPointsBordering :: Square -> [Point]
-allPointsBordering (p1, p2) = 
-    [Point xMin y | y <- [yMin .. yMax]]
-    ++ [Point xMax y | y <- [yMin .. yMax]]
-    ++ [Point x yMin | x <- [xMin .. xMax]]
-    ++ [Point x yMax | x <- [xMin .. xMax]]
-  where 
-    xMin = min (x p1) (x p2)
-    xMax = max (x p1) (x p2)
-    yMin = min (y p1) (y p2)
-    yMax = max (y p1) (y p2)
-
+-- assume no borders of only 1 distance between them, so any time you cross a border inside the target rectangle it's bad
 isSquareInside :: Square -> [LineSegment] -> Int -> Bool
-isSquareInside square shape xMax = foldl' (\memo p -> memo && isInShape p xMax shape) True (allPointsBordering square)
+isSquareInside square shape xMaxBounds = 
+    Set.disjoint (insetSquare square) (allBorderPoints shape) &&
+    odd (numLinesCrossed (lineToRight (middleSquare square) xMaxBounds) shape)
 
-isPointOnBounds :: Point -> [LineSegment] -> Bool
-isPointOnBounds p bounds = foldl' (\m (l1, l2) -> m
-    || (x l1 == x l2 && x p == x l1 && y p <= max (y l1) (y l2) && y p >= min (y l1) (y l2))
-    || (y l1 == y l2 && y p == y l1 && x p <= max (x l1) (x l2) && x p >= min (x l1) (x l2))
-    ) False bounds
+-- isPointOnBounds :: Point -> [LineSegment] -> Bool
+-- isPointOnBounds p bounds = foldl' (\m (l1, l2) -> m
+--     || (x l1 == x l2 && x p == x l1 && y p <= max (y l1) (y l2) && y p >= min (y l1) (y l2))
+--     || (y l1 == y l2 && y p == y l1 && x p <= max (x l1) (x l2) && x p >= min (x l1) (x l2))
+--     ) False bounds
 
 intersection :: LineSegment -> LineSegment -> Bool
 intersection horizontal line =
@@ -137,33 +156,28 @@ intersection horizontal line =
 numLinesCrossed :: LineSegment -> [LineSegment] -> Int
 numLinesCrossed line shape = map (intersection line) shape & map (\b -> if b then 1 else 0) & sum
 
-isOnBorder :: Point -> [LineSegment] -> Bool
-isOnBorder p shape = 
-    any (\(p1, p2) -> min (y p1) (y p2) <= y p && y p <= max (y p1) (y p2)) vertical
-    || any (\(p1, p2) -> min (x p1) (x p2) <= x p && x p <= max (x p1) (x p2)) horizontal
-    where
-        vertical = filter (\(p1, p2) -> x p1 == x p2 && x p == x p1) shape
-        horizontal = filter (\(p1, p2) -> y p1 == y p2 && y p == y p1) shape
+-- isOnBorder :: Point -> [LineSegment] -> Bool
+-- isOnBorder p shape = 
+--     any (\(p1, p2) -> min (y p1) (y p2) <= y p && y p <= max (y p1) (y p2)) vertical
+--     || any (\(p1, p2) -> min (x p1) (x p2) <= x p && x p <= max (x p1) (x p2)) horizontal
+--     where
+--         vertical = filter (\(p1, p2) -> x p1 == x p2 && x p == x p1) shape
+--         horizontal = filter (\(p1, p2) -> y p1 == y p2 && y p == y p1) shape
 
-isInShape :: Point -> Int -> [LineSegment] -> Bool
-isInShape point xMax shape = isOnBorder point shape || odd (numLinesCrossed (lineToRight point xMax)  shape)
+-- isInShape :: Point -> Int -> [LineSegment] -> Bool
+-- isInShape point xMax shape = isOnBorder point shape || odd (numLinesCrossed (lineToRight point xMax)  shape)
 
 shapeCoords :: [Point] -> [LineSegment]
 shapeCoords input = zip input (rotate input)
 
 part2 input = 
-    sortedSquares input
-    & filter (\square -> isSquareInside square (shapeCoords input) inputMaxX)
+    input
+    & [makeSquare p1 p2 | p1 <- input, p2 <- input, p1 < p2]
+    & sort
+    & reverse
+    & find (\square -> isSquareInside square (shapeCoords input) inputMaxX)
     where
         inputMaxX = map x input & maximum
-
-sortedSquares :: [Point] -> [(Point, Point)]      
-sortedSquares input =
-            [(squareSize p1 p2, p1, p2) | p1 <- input, p2 <- input, p1 < p2]
-            & sort
-            & reverse
-            & map (\(s, p1, p2) -> (p1, p2))
-
 
 main = do
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
