@@ -93,7 +93,7 @@ pointsFromSegment (p1, p2) =
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
 
-part2 input = (Set.lookupMin <$> insideRect & join, Set.lookupMax =<< insideRect)
+part2 input = makeRect <$> (Set.lookupMin <$> insideRect & join) <*> (Set.lookupMax =<< insideRect)
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
