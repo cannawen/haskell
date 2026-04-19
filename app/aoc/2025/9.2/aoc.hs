@@ -5,6 +5,7 @@ import Data.List
 import qualified Data.Set as Set
 import Data.Ord
 import Data.Time
+import Control.Monad
 
 -- type Point = (Int, Int, Int)
 data Point = Point
@@ -91,13 +92,14 @@ pointsFromSegment (p1, p2) =
         then [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
-part2 input = Set.size <$> insideRects
+
+part2 input = (Set.lookupMin <$> insideRect & join, Set.lookupMax =<< insideRect)
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
         shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
         insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
-        insideRects = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
+        insideRect = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
             & sortBy (comparing Down)
             & map borderPointsInRect
             & find (\rectanglePoints ->  rectanglePoints `Set.isSubsetOf` insidePoints)
