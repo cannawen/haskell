@@ -61,6 +61,15 @@ borderPointsInRect s =
     & map Set.fromList
     & Set.unions
 
+cornerPointsInRect :: Rect -> (Set.Set Point, Rect)
+cornerPointsInRect s =  (Set.fromList
+    [
+        Point (xMin s) (yMin s), 
+        Point (xMin s) (yMax s), 
+        Point (xMax s) (yMax s), 
+        Point (xMax s) (yMin s)
+    ], s)
+
 parse :: String -> [Point]
 parse input =
     map ((\arr -> Point (head arr) (last arr)) . (\point -> map read point)) (lines input
@@ -101,8 +110,11 @@ part2 input = makeRect <$> (Set.lookupMin <$> insideRect & join) <*> (Set.lookup
         insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
         insideRect = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
             & sortBy (comparing Down)
-            & map borderPointsInRect
+            & map cornerPointsInRect
+            & filter (\(rectanglePoints, _) ->  rectanglePoints `Set.isSubsetOf` insidePoints)
+            & map (borderPointsInRect . snd)
             & find (\rectanglePoints ->  rectanglePoints `Set.isSubsetOf` insidePoints)
+
         maxXBound = map x input & maximum & succ
         maxYBound = map y input & maximum & succ
 
