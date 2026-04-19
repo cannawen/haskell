@@ -4,6 +4,7 @@ import Data.List.Split
 import Data.List
 import qualified Data.Set as Set
 import Data.Ord
+import Data.Time
 
 -- type Point = (Int, Int, Int)
 data Point = Point
@@ -104,8 +105,12 @@ part2 input = Set.size <$> insideRects
         maxYBound = map y input & maximum & succ
 
 main = do
+    now <- getCurrentTime
+    putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
+
     contents <- readFile "app/aoc/2025/9/input.txt"
 
     print $ part2 $ parse contents
 
--- exampleInput = parse <$> readFile "app/aoc/2025/9/input-mini.txt"
+    done <- getCurrentTime
+    putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" done)
