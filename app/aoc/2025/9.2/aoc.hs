@@ -40,7 +40,7 @@ instance Ord Square where
     compare = comparing size
 
 size :: Square -> Int
-size s = (xMax s - xMin s) * (yMax s - yMin s)
+size s = succ (xMax s - xMin s) * succ (yMax s - yMin s)
 
 makeSquare :: Point -> Point -> Square
 makeSquare p1 p2 =
@@ -51,22 +51,23 @@ makeSquare p1 p2 =
         yMax = max (y p1) (y p2)
     }
 
+pointsInSquare :: Square -> Set.Set Point
+pointsInSquare s = Set.fromList [Point x y | x <- [xMin s .. xMax s], y <- [yMin s .. yMax s]]
+
 parse :: String -> [Point]
 parse input =
-    lines input
-    & map (splitOn ",")
-    & map (\point -> map read point)
-    & map (\arr -> Point (head arr) (last arr))
+    map ((\arr -> Point (head arr) (last arr)) . (\point -> map read point)) (lines input
+    & map (splitOn ","))
 
 shapeFromPoints :: [Point] -> [LineSegment]
 shapeFromPoints points = zip points (rotate points)
     where rotate arr = tail arr ++ [head arr]
 
 rayCast:: LineSegment -> ShapePoints -> Int
-rayCast line shape = 
-    foldl 
-    (\memo p -> if Set.member p shape then memo + 1 else memo) 
-    0 
+rayCast line shape =
+    foldl
+    (\memo p -> if Set.member p shape then memo + 1 else memo)
+    0
     (pointsFromSegment line)
 
 createRay :: Point -> Int -> LineSegment
@@ -84,16 +85,21 @@ pointsFromSegment (p1, p2) =
         then [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
-part2 input = [(Point x y, isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical )| x <- [0.. maxXBound], y <- [0..maxYBound]]
+part2 input = Set.size <$> insideSquares
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
         shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
+        insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
+        insideSquares = [makeSquare p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
+            & sortBy (comparing Down)
+            & map pointsInSquare
+            & find (\rectanglePoints ->  rectanglePoints `Set.isSubsetOf` insidePoints)
         maxXBound = map x input & maximum & succ
         maxYBound = map y input & maximum & succ
 
 main = do
-    contents <- readFile "app/aoc/2025/9/input-mini.txt"
+    contents <- readFile "app/aoc/2025/9/input.txt"
 
     print $ part2 $ parse contents
 
