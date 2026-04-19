@@ -29,30 +29,35 @@ isHorizontal (p1, p2) = x p1 == x p2
 
 type ShapePoints = Set.Set Point
 
-data Square = Square
+data Rect = Rect
     { xMin :: Int
     , yMin :: Int
     , xMax :: Int
     , yMax :: Int
     } deriving (Eq, Show)
 
-instance Ord Square where
+instance Ord Rect where
     compare = comparing size
 
-size :: Square -> Int
+size :: Rect -> Int
 size s = succ (xMax s - xMin s) * succ (yMax s - yMin s)
 
-makeSquare :: Point -> Point -> Square
-makeSquare p1 p2 =
-    Square {
+makeRect :: Point -> Point -> Rect
+makeRect p1 p2 =
+    Rect {
         xMin = min (x p1) (x p2),
         yMin = min (y p1) (y p2),
         xMax = max (x p1) (x p2),
         yMax = max (y p1) (y p2)
     }
 
-pointsInSquare :: Square -> Set.Set Point
-pointsInSquare s = Set.fromList [Point x y | x <- [xMin s .. xMax s], y <- [yMin s .. yMax s]]
+borderPointsInRect :: Rect -> Set.Set Point
+borderPointsInRect s = 
+    [Point (xMin s) (yMin s), Point (xMin s) (yMax s), Point (xMax s) (yMax s), Point (xMax s) (yMin s)]
+    & shapeFromPoints
+    & map pointsFromSegment
+    & map Set.fromList
+    & Set.unions
 
 parse :: String -> [Point]
 parse input =
@@ -85,15 +90,15 @@ pointsFromSegment (p1, p2) =
         then [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
-part2 input = Set.size <$> insideSquares
+part2 input = Set.size <$> insideRects
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
         shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
         insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
-        insideSquares = [makeSquare p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
+        insideRects = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
             & sortBy (comparing Down)
-            & map pointsInSquare
+            & map borderPointsInRect
             & find (\rectanglePoints ->  rectanglePoints `Set.isSubsetOf` insidePoints)
         maxXBound = map x input & maximum & succ
         maxYBound = map y input & maximum & succ
