@@ -53,27 +53,26 @@ makeRect p1 p2 =
         yMax = max (y p1) (y p2)
     }
 
-borderPointsInRect :: Rect -> Set.Set Point
-borderPointsInRect s = 
-    [Point (xMin s) (yMin s), Point (xMin s) (yMax s), Point (xMax s) (yMax s), Point (xMax s) (yMin s)]
+borderPointsInRect :: Rect -> ([Point], Rect)
+borderPointsInRect s =
+    ([Point (xMin s) (yMin s), Point (xMin s) (yMax s), Point (xMax s) (yMax s), Point (xMax s) (yMin s)]
     & shapeFromPoints
     & map pointsFromSegment
-    & map Set.fromList
-    & Set.unions
+    & concat
+    , s)
 
-cornerPointsInRect :: Rect -> (Set.Set Point, Rect)
-cornerPointsInRect s =  (Set.fromList
+cornerPointsInRect :: Rect -> ([Point], Rect)
+cornerPointsInRect s =  (
     [
-        Point (xMin s) (yMin s), 
-        Point (xMin s) (yMax s), 
-        Point (xMax s) (yMax s), 
+        Point (xMin s) (yMin s),
+        Point (xMin s) (yMax s),
+        Point (xMax s) (yMax s),
         Point (xMax s) (yMin s)
     ], s)
 
 parse :: String -> [Point]
 parse input =
-    map ((\arr -> Point (head arr) (last arr)) . (\point -> map read point)) (lines input
-    & map (splitOn ","))
+    map (((\arr -> Point (head arr) (last arr)) . (map read)) . splitOn ",") (lines input)
 
 shapeFromPoints :: [Point] -> [LineSegment]
 shapeFromPoints points = zip points (rotate points)
@@ -89,11 +88,13 @@ rayCast line shape =
 createRay :: Point -> Int -> LineSegment
 createRay p maxY = (p, Point (x p) maxY)
 
-isPointInShape :: Point -> Int -> ShapePoints -> ShapePoints -> Bool
-isPointInShape point bound shapeH shapeV =
+isPointInShape :: Int -> ShapePoints -> ShapePoints -> Point -> Bool
+isPointInShape bound shapeH shapeV point =
     Set.member point shapeH ||
     Set.member point shapeV ||
     odd (rayCast (createRay point bound) shapeV)
+
+arePointsInShape maxYBound shapePointsHorizontal shapePointsVertical = map (isPointInShape maxYBound shapePointsHorizontal shapePointsVertical)
 
 pointsFromSegment:: LineSegment -> [Point]
 pointsFromSegment (p1, p2) =
@@ -102,18 +103,20 @@ pointsFromSegment (p1, p2) =
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
 
-part2 input = makeRect <$> (Set.lookupMin <$> insideRect & join) <*> (Set.lookupMax =<< insideRect)
+part2 input =  insideRect
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
         shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
-        insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
-        insideRect = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2] 
+
+        -- insidePoints = Set.fromList [Point x y | x <- [0.. maxXBound], y <- [0..maxYBound], isPointInShape (Point x y) maxYBound shapePointsHorizontal shapePointsVertical]
+
+        insideRect = [makeRect p1 p2 | p1 <- input, p2 <- input, p1 < p2]
             & sortBy (comparing Down)
             & map cornerPointsInRect
-            & filter (\(rectanglePoints, _) ->  rectanglePoints `Set.isSubsetOf` insidePoints)
-            & map (borderPointsInRect . snd)
-            & find (\rectanglePoints ->  rectanglePoints `Set.isSubsetOf` insidePoints)
+            & filter (\(rectanglePoints, _) -> and (arePointsInShape maxYBound shapePointsHorizontal shapePointsVertical rectanglePoints))
+            & map (\(_, rect) -> borderPointsInRect rect)
+            & find (\(points, rect) -> and (arePointsInShape maxYBound shapePointsHorizontal shapePointsVertical points))
 
         maxXBound = map x input & maximum & succ
         maxYBound = map y input & maximum & succ
