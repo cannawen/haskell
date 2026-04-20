@@ -21,6 +21,30 @@ landBirds =
     >>= banana
     >>= landRight 1
 
-main = do
-    print landBirds
+maybeAdd0 = (+) <$> Just 3 <*> Just 4
 
+maybeAdd1 = (pure (+)) <*> Just 3 <*> Just 4
+
+maybeAdd2 = liftA2 (+) (Just 3) (Just 4)
+
+maybeAdd3 = Just 3 >>= (\x -> Just 4 >>= (\y -> Just (x + y)))
+
+maybeAdd4 = 
+    Just 3 >>= (\x -> 
+    Just 4 >>= (\y -> 
+    Just (x + y)))
+
+maybeAdd5 = do
+    x <- Just 3
+    y <- Just 4
+    Just (x + y)
+
+maybeAdd = do
+    print maybeAdd0
+    print maybeAdd1
+    print maybeAdd2
+    print maybeAdd3
+    print maybeAdd4
+    print maybeAdd5
+
+main = maybeAdd
