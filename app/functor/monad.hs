@@ -14,10 +14,13 @@ createMaybePole (l, r) = if abs (l - r) < 4 then Just (l, r) else Nothing
 banana :: Pole -> Maybe Pole
 banana _ = Nothing
 
-main = do 
+landBirds =
     return (0,0)
     >>= landLeft 1 
     >>= landRight 1
     >>= banana
     >>= landRight 1
-    & print
+
+main = do
+    print landBirds
+
