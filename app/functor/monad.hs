@@ -13,7 +13,8 @@ createMaybePole (l, r) = if abs (l - r) < 4 then Just (l, r) else Nothing
 
 
 main = do 
-    landLeft 1 (0,0)
+    return (0,0)
+    >>= landLeft 1 
     >>= landRight 1
     >>= landRight 5
     & print
