@@ -1,5 +1,6 @@
 import Data.Function
 import Control.Applicative
+import Control.Monad
 type Bird = Int
 type Pole = (Int, Int)
 
@@ -71,4 +72,24 @@ zip5 = do
 zipL = do 
     mapM_ print [zip0, zip1, zip2, zipThree, zip4, zip5]
 
-main = zipL
+list0 = (\x -> [x,-x] ) <$> [3,4,5]
+
+list1 = [3,4,5] >>= (\x -> [x,-x])
+
+list2 = do
+    x <- [3,4,5]
+    [x,-x]
+
+list3 = [x | x <- [1..50], '7' `elem` show x]
+list4 = [1..50] >>= (\x -> guard ('7' `elem` show x) >> return x)
+
+list5 = do
+    x <- [1..50]
+    guard ('7' `elem` show x)
+    return x
+
+list = do 
+    print list0
+    mapM_ print [list1, list2, list3, list4, list5]
+
+main = list
