@@ -1,4 +1,5 @@
 import Data.Function
+import Control.Applicative
 type Bird = Int
 type Pole = (Int, Int)
 
@@ -47,11 +48,27 @@ maybeAdd5 = do
     Just (x + y)
 
 maybeAdd = do
-    print maybeAdd0
-    print maybeAdd1
-    print maybeAdd2
-    print maybeAdd3
-    print maybeAdd4
-    print maybeAdd5
+    mapM_ print [maybeAdd0, maybeAdd1, maybeAdd2, maybeAdd3, maybeAdd4, maybeAdd5]
 
-main = print landBirds1
+zip0 = (+) <$> [1, 2] <*> [10, 20]
+
+zip1 = [(+)] <*> [1, 2] <*> [10, 20]
+
+zip2 = liftA2 (+)  [1, 2]  [10, 20]
+
+zipThree = [1, 2] >>= (\x -> [10, 20] >>= (\y -> [x + y]))
+
+zip4 = 
+    [1, 2] >>= (\x -> 
+    [10, 20] >>= (\y -> 
+    [x + y]))
+
+zip5 = do 
+    x <- [1, 2]
+    y <- [10, 20]
+    [x + y]
+
+zipL = do 
+    mapM_ print [zip0, zip1, zip2, zipThree, zip4, zip5]
+
+main = zipL
