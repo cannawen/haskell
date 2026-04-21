@@ -105,3 +105,9 @@ executable monad
     build-depends:    containers ^>=0.6.7, base >=4.16 && <5,
     hs-source-dirs:   app/functor/
     default-language: Haskell2010
+
+executable knight
+    main-is:          knight.hs
+    build-depends:    containers ^>=0.6.7, base >=4.16 && <5,
+    hs-source-dirs:   app/functor/
+    default-language: Haskell2010
