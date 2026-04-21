@@ -16,7 +16,17 @@ move (kx, ky) = do
     guard (kx + dx < boardSize && kx + dx >= 0 && ky + dy < boardSize && ky + dy >= 0 )
     return (kx + dx, ky + dy)
 
+inThreeMovesA start = do 
+    oneMove <- move start
+    twoMove <- move oneMove
+    move twoMove
+inThreeMovesB start = return start >>= move >>= move >>= move
+
+inThreeMoves start = move start >>= move >>= move
+
+canReachIn3 :: Knight -> Knight -> Bool
+canReachIn3 start end = end `elem` inThreeMoves start
+
 main = do
-    print knightDirections
-    print $ move (5,1)
-    print $ move (7,0)
+    print $ canReachIn3 (5,1) (5,0)
+    print $ canReachIn3 (5,1) (6,2)
