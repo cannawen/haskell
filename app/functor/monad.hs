@@ -14,12 +14,19 @@ createMaybePole (l, r) = if abs (l - r) < 4 then Just (l, r) else Nothing
 banana :: Pole -> Maybe Pole
 banana _ = Nothing
 
-landBirds =
+landBirds0 =
     return (0,0)
     >>= landLeft 1 
     >>= landRight 1
     >>= banana
     >>= landRight 1
+
+landBirds1 = do
+    start <- return (0,0)
+    first <- landLeft 2 start
+    second <- landRight 2 first
+    Nothing -- whoa, this is chained
+    landLeft 1 second
 
 maybeAdd0 = (+) <$> Just 3 <*> Just 4
 
@@ -47,4 +54,4 @@ maybeAdd = do
     print maybeAdd4
     print maybeAdd5
 
-main = maybeAdd
+main = print landBirds1
