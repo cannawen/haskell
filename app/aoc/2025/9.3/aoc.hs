@@ -7,6 +7,7 @@ import Data.Ord
 import Data.Time
 import Control.Monad
 import qualified Data.Map as Map
+import qualified Control.Applicative as Map
 
 -- type Point = (Int, Int, Int)
 data Point = Point
@@ -46,12 +47,20 @@ exampleInput = parse <$> readFile "app/aoc/2025/9/input-mini.txt"
 
 type Row = Int
 type Column = Int
-type NumLinesToLeft = Int
+-- type NumLinesToLeft = Int
 
 type EncodedShape = Map.Map Row [Column]
 
 encode :: Set.Set Point -> Int -> EncodedShape
-encode shapeV xBound = Map.fromList [(xi, map y (Set.toList (Set.filter (\p -> x p == xi) shapeV))) |  xi <- [0 .. xBound]]
+encode shapeV xBound = Map.fromList [(xi, (map y (Set.toList (Set.filter (\p -> x p == xi) shapeV)))) |  xi <- [0 .. xBound]]
+
+showCol :: [Column] -> String
+showCol c = show c -- map (\col -> show col ++ ", " ) c & concat
+
+showEncodedShape :: EncodedShape -> String
+showEncodedShape shape = Map.toList shape
+    & map (\(row, colList) -> show row ++ ": " ++ showCol colList ++ "\n")
+    & concat
 
 size :: Rect -> Int
 size s = succ (xMax s - xMin s) * succ (yMax s - yMin s)
@@ -137,9 +146,9 @@ main = do
     now <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
 
-    contents <- readFile "app/aoc/2025/9/input-mini.txt"
+    contents <- readFile "app/aoc/2025/9/input.txt"
 
-    print $ part2 $ parse contents
+    writeFile "app/aoc/2025/9.3/output.txt" $ show $ part2 $ parse contents
 
     done <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" done)
