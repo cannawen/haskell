@@ -50,11 +50,8 @@ type Column = Int
 
 type EncodedShape = Map.Map Row [Column]
 
--- encode :: Set.Set Point -> Int -> EncodedShape
--- encode shapeV xBound = Map.fromList [(xi, (map y (Set.toList (Set.filter (\p -> x p == xi) shapeV)))) |  xi <- [0 .. xBound]]
-
-showCol :: [Column] -> String
-showCol c = show c -- map (\col -> show col ++ ", " ) c & concat
+encode :: Set.Set Point -> Int -> EncodedShape
+encode shapeV xBound = Map.fromList [(xi, (map y (Set.toList (Set.filter (\p -> x p == xi) shapeV)))) |  xi <- [0 .. xBound]]
 
 showEncodedShape :: EncodedShape -> String
 showEncodedShape shape = Map.toList shape
@@ -113,6 +110,17 @@ part1 input =
 
 shapePoints shape = Set.unions (map (Set.fromList . pointsFromSegment) shape)
 
+
+-- Part 2 (no saving shape) ----------------------------------------------------------------------------------------------------------------
+
+part2Saving points = encode shapePointsVertical xBounds
+    where
+        xBounds = points & map x & maximum & succ
+        shape = shapeFromPoints points 
+        shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
+        shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
+
+
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
 pt2' shape input = pt2 shape (part1 input) (shapePoints $ shapeFromPoints input)
@@ -148,8 +156,12 @@ main = do
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
 
     contents <- readFile "app/aoc/2025/9/input-mini.txt"
-    savedShape <- readFile "app/aoc/2025/9.3/output.txt"
+
+    -- print $ part2Saving (parse contents)
+
+    savedShape <- readFile "app/aoc/2025/9.3/output-mini.txt"
     print $ pt2' (read savedShape :: EncodedShape) (parse contents)
+
 
     done <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" done)
