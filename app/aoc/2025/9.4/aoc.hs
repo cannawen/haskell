@@ -40,6 +40,18 @@ makeRect p1 p2 =
         yMax = max (y p1) (y p2)
     }
 
+makeSmallerRect :: Rect -> Rect
+makeSmallerRect r =
+    Rect {
+        xMin = succ $ xMin r,
+        yMin = succ $ yMin r,
+        xMax = pred $ xMax r,
+        yMax = pred $ yMax r
+    }
+
+pointInRect :: Rect -> Point
+pointInRect r = Point (xMin r & succ) (yMin r & succ)
+
 cornerPointsInRect :: Rect -> [Point]
 cornerPointsInRect s =
     [
@@ -101,8 +113,8 @@ part2Saving points = encode shapePointsVertical xBounds
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
 part2 shape input =
-    filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rect
-    & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
+    filter (\r -> Set.disjoint shapeBorder (borderPointsInRect (makeSmallerRect r) & Set.fromList)) rect
+    & find (\rect -> pointInsideShape (pointInRect rect) shape shapeBorder) 
     where
         rect = part1 input
         shapeBorder = shapePoints (lineSegmentsFromCornerPoints input)
