@@ -88,6 +88,12 @@ executable 9.3
     hs-source-dirs:   app/aoc/2025/9.3
     default-language: Haskell2010
 
+executable 9.4
+    main-is:          aoc.hs
+    build-depends:    time ^>=1.12.2, split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
+    hs-source-dirs:   app/aoc/2025/9.4
+    default-language: Haskell2010
+
 executable Viz
     main-is:          Visualize.hs
     build-depends:    split ^>=0.2.5, containers ^>=0.6.7, base >=4.16 && <5,
