@@ -46,7 +46,6 @@ exampleInput = parse <$> readFile "app/aoc/2025/9/input-mini.txt"
 
 type Row = Int
 type Column = Int
--- type NumLinesToLeft = Int
 
 type EncodedShape = Map.Map Row [Column]
 
@@ -110,8 +109,7 @@ part1 input =
 
 shapePoints shape = Set.unions (map (Set.fromList . pointsFromSegment) shape)
 
-
--- Part 2 (no saving shape) ----------------------------------------------------------------------------------------------------------------
+-- Part 2 (code to save encoded shape) ----------------------------------------------------------------------------------------------------------------
 
 part2Saving points = encode shapePointsVertical xBounds
     where
@@ -119,7 +117,6 @@ part2Saving points = encode shapePointsVertical xBounds
         shape = shapeFromPoints points 
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
         shapePointsVertical = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
-
 
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
@@ -155,13 +152,10 @@ main = do
     now <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
 
-    contents <- readFile "app/aoc/2025/9/input-mini.txt"
+    contents <- readFile "app/aoc/2025/9/input.txt"
+    savedShape <- readFile "app/aoc/2025/9.3/output.txt"
 
-    -- print $ part2Saving (parse contents)
-
-    savedShape <- readFile "app/aoc/2025/9.3/output-mini.txt"
     print $ pt2' (read savedShape :: EncodedShape) (parse contents)
-
 
     done <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" done)
