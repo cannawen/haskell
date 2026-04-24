@@ -50,15 +50,15 @@ type Column = Int
 
 type EncodedShape = Map.Map Row [Column]
 
-encode :: Set.Set Point -> Int -> EncodedShape
-encode shapeV xBound = Map.fromList [(xi, (map y (Set.toList (Set.filter (\p -> x p == xi) shapeV)))) |  xi <- [0 .. xBound]]
+-- encode :: Set.Set Point -> Int -> EncodedShape
+-- encode shapeV xBound = Map.fromList [(xi, (map y (Set.toList (Set.filter (\p -> x p == xi) shapeV)))) |  xi <- [0 .. xBound]]
 
 showCol :: [Column] -> String
 showCol c = show c -- map (\col -> show col ++ ", " ) c & concat
 
 showEncodedShape :: EncodedShape -> String
 showEncodedShape shape = Map.toList shape
-    & map (\(row, colList) -> show row ++ ": " ++ showCol colList ++ "\n")
+    & map (\(row, colList) -> show row ++ ": " ++ show colList ++ "\n")
     & concat
 
 size :: Rect -> Int
@@ -73,22 +73,21 @@ makeRect p1 p2 =
         yMax = max (y p1) (y p2)
     }
 
-borderPointsInRect :: Rect -> ([Point], Rect)
+borderPointsInRect :: Rect -> [Point]
 borderPointsInRect s =
-    ([Point (xMin s) (yMin s), Point (xMin s) (yMax s), Point (xMax s) (yMax s), Point (xMax s) (yMin s)]
+    [Point (xMin s) (yMin s), Point (xMin s) (yMax s), Point (xMax s) (yMax s), Point (xMax s) (yMin s)]
     & shapeFromPoints
     & map pointsFromSegment
     & concat
-    , s)
 
-cornerPointsInRect :: Rect -> ([Point], Rect)
-cornerPointsInRect s =  (
-    [
-        Point (xMin s) (yMin s),
-        Point (xMin s) (yMax s),
-        Point (xMax s) (yMax s),
-        Point (xMax s) (yMin s)
-    ], s)
+-- cornerPointsInRect :: Rect -> ([Point], Rect)
+-- cornerPointsInRect s =  (
+--     [
+--         Point (xMin s) (yMin s),
+--         Point (xMin s) (yMax s),
+--         Point (xMax s) (yMax s),
+--         Point (xMax s) (yMin s)
+--     ], s)
 
 pointsFromSegment:: LineSegment -> [Point]
 pointsFromSegment (p1, p2) =
@@ -113,29 +112,42 @@ part1 input =
     & reverse
 
 
-shapePointsHorizontal shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
-shapePointsVertical shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
+-- shapePointsHorizontal shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
+-- shapePointsVertical shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
+shapePoints shape = Set.unions (map (Set.fromList . pointsFromSegment) shape)
 
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
 
-pt2' shape input = pt2 shape (part1 input) (shapePointsHorizontal s) (shapePointsVertical s)
-    where s = shapeFromPoints input
+pt2' shape input = pt2 shape (part1 input) (shapePoints $ shapeFromPoints input)
 
-pt2 :: EncodedShape -> [Rect] -> ShapePoints -> ShapePoints -> Maybe Rect
-pt2 shape rect shapeH shapeV = 
+
+isPointInEncodedShape :: Point -> EncodedShape -> Bool
+isPointInEncodedShape p s = 
+    case cols of 
+    Nothing -> False
+    Just columns -> odd $ length (takeWhile (< y p) columns)
+    where cols = Map.lookup (x p) s
+    
+
+pointInsideShape :: Point -> EncodedShape -> Set.Set Point -> Bool
+pointInsideShape p encodedShape borderPoints = 
+    Set.member p borderPoints || isPointInEncodedShape p encodedShape
+
+pt2 :: EncodedShape -> [Rect] -> ShapePoints -> Maybe Rect
+pt2 shape rect shapeBorder = 
     find 
     (\r -> 
-        True --TODO
-    ) rect
+        all 
+        (\p -> pointInsideShape p shape shapeBorder) 
+        (borderPointsInRect r)) 
+    rect
 
 main = do
     now <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
 
-    contents <- readFile "app/aoc/2025/9/input.txt"
-    -- print $ part2 $ parse contents
-
+    contents <- readFile "app/aoc/2025/9/input-mini.txt"
     savedShape <- readFile "app/aoc/2025/9.3/output.txt"
     print $ pt2' (read savedShape :: EncodedShape) (parse contents)
 
