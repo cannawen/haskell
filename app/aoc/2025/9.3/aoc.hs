@@ -6,6 +6,7 @@ import qualified Data.Set as Set
 import Data.Ord
 import Data.Time
 import Control.Monad
+import qualified Data.Map as Map
 
 -- type Point = (Int, Int, Int)
 data Point = Point
@@ -40,6 +41,17 @@ data Rect = Rect
 
 instance Ord Rect where
     compare = comparing size
+
+exampleInput = parse <$> readFile "app/aoc/2025/9/input-mini.txt"
+
+type Row = Int
+type Column = Int
+type NumLinesToLeft = Int
+
+type EncodedShape = Map.Map Row [Column]
+
+encode :: Set.Set Point -> Int -> EncodedShape
+encode shapeV xBound = Map.fromList [(xi, map y (Set.toList (Set.filter (\p -> x p == xi) shapeV))) |  xi <- [0 .. xBound]]
 
 size :: Rect -> Int
 size s = succ (xMax s - xMin s) * succ (yMax s - yMin s)
@@ -80,7 +92,7 @@ shapeFromPoints points = zip points (rotate points)
 
 rayCast:: LineSegment -> ShapePoints -> Int
 rayCast line shape =
-    foldl
+    foldl'
     (\memo p -> if Set.member p shape then memo + 1 else memo)
     0
     (pointsFromSegment line)
@@ -103,7 +115,7 @@ pointsFromSegment (p1, p2) =
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
 
 
-part2 input =  insideRect
+part2 input =  encode shapePointsVertical maxXBound-- insideRect
     where
         shape = shapeFromPoints input
         shapePointsHorizontal = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
@@ -125,7 +137,7 @@ main = do
     now <- getCurrentTime
     putStrLn (formatTime defaultTimeLocale "%A, %B %e, %Y - %H:%M:%S" now)
 
-    contents <- readFile "app/aoc/2025/9/input.txt"
+    contents <- readFile "app/aoc/2025/9/input-mini.txt"
 
     print $ part2 $ parse contents
 
