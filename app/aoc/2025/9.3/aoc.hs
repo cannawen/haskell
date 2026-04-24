@@ -80,14 +80,14 @@ borderPointsInRect s =
     & map pointsFromSegment
     & concat
 
--- cornerPointsInRect :: Rect -> ([Point], Rect)
--- cornerPointsInRect s =  (
---     [
---         Point (xMin s) (yMin s),
---         Point (xMin s) (yMax s),
---         Point (xMax s) (yMax s),
---         Point (xMax s) (yMin s)
---     ], s)
+cornerPointsInRect :: Rect -> [Point]
+cornerPointsInRect s =
+    [
+        Point (xMin s) (yMin s),
+        Point (xMin s) (yMax s),
+        Point (xMax s) (yMax s),
+        Point (xMax s) (yMin s)
+    ]
 
 pointsFromSegment:: LineSegment -> [Point]
 pointsFromSegment (p1, p2) =
@@ -111,16 +111,11 @@ part1 input =
     & sort
     & reverse
 
-
--- shapePointsHorizontal shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter isHorizontal shape))
--- shapePointsVertical shape = Set.unions (map (Set.fromList . pointsFromSegment) (filter (not . isHorizontal) shape))
 shapePoints shape = Set.unions (map (Set.fromList . pointsFromSegment) shape)
 
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
-
 pt2' shape input = pt2 shape (part1 input) (shapePoints $ shapeFromPoints input)
-
 
 isPointInEncodedShape :: Point -> EncodedShape -> Bool
 isPointInEncodedShape p s = 
@@ -129,19 +124,24 @@ isPointInEncodedShape p s =
     Just columns -> odd $ length (takeWhile (< y p) columns)
     where cols = Map.lookup (x p) s
     
-
 pointInsideShape :: Point -> EncodedShape -> Set.Set Point -> Bool
 pointInsideShape p encodedShape borderPoints = 
     Set.member p borderPoints || isPointInEncodedShape p encodedShape
 
 pt2 :: EncodedShape -> [Rect] -> ShapePoints -> Maybe Rect
 pt2 shape rect shapeBorder = 
+    filter 
+    (\r -> 
+        all 
+        (\p -> pointInsideShape p shape shapeBorder) 
+        (cornerPointsInRect r)) 
+    rect 
+    &
     find 
     (\r -> 
         all 
         (\p -> pointInsideShape p shape shapeBorder) 
         (borderPointsInRect r)) 
-    rect
 
 main = do
     now <- getCurrentTime
