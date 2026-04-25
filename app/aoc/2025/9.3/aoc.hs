@@ -16,8 +16,6 @@ type LineSegment = (Point, Point)
 isHorizontal :: LineSegment -> Bool
 isHorizontal (p1, p2) = x p1 == x p2
 
-type ShapePoints = Set.Set Point
-
 data Rect = Rect
     { xMin :: Int
     , yMin :: Int
@@ -75,11 +73,14 @@ encode shapeV xBound =
       [(0,[])]
     & Map.fromList
 
-intermediaryPointsFromSegment:: LineSegment -> [Point]
+intermediaryPointsFromSegment :: LineSegment -> [Point]
 intermediaryPointsFromSegment (p1, p2) =
     if isHorizontal (p1, p2)
         then [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
+        -- This pred thing is kinda weird, but needed for ray tracing
+        -- I don't love that the function name is lying to the user a bit
         else [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
+
 
 lineSegmentsFromCornerPoints :: [Point] -> [LineSegment]
 lineSegmentsFromCornerPoints points = zip points (rotate points)
@@ -89,30 +90,28 @@ parse :: String -> [Point]
 parse input =
     map (((\arr -> Point (head arr) (last arr)) . (map read)) . splitOn ",") (lines input)
 
--- Part 1 ----------------------------------------------------------------------------------------------------------------
-
-part1 input =
+sortedRects :: [Point] -> [Rect]
+sortedRects input =
     [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
     & map (uncurry makeRect)
     & sortBy (comparing Down)
 
+shapePoints :: [LineSegment] -> Set.Set Point
 shapePoints shape = Set.unions (map (Set.fromList . intermediaryPointsFromSegment) shape)
 
--- Part 2 (code to save encoded shape) ----------------------------------------------------------------------------------------------------------------
-
+encodedShape :: [Point] -> Map.Map Row [Column]
 encodedShape points = encode shapePointsVertical xBounds
     where
         xBounds = points & map x & maximum & succ
         shape = lineSegmentsFromCornerPoints points
         shapePointsVertical = Set.unions (map (Set.fromList . intermediaryPointsFromSegment) (filter (not . isHorizontal) shape))
 
--- Part 2 ----------------------------------------------------------------------------------------------------------------
-
+part2 :: [Point] -> Maybe Rect
 part2 input =
     filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rect
     & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
     where
-        rect = part1 input
+        rect = sortedRects input
         shape = encodedShape input
         shapeBorder = shapePoints (lineSegmentsFromCornerPoints input)
 
@@ -126,6 +125,7 @@ pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
 pointInsideShape p encodedShape borderPoints =
     Set.member p borderPoints || isPointInEncodedShape p encodedShape
 
+main :: IO ()
 main = do
     contents <- readFile "app/aoc/2025/9/input.txt"
     print $ size <$> part2 (parse contents)
