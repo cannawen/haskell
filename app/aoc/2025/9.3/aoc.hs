@@ -65,8 +65,7 @@ intermediaryPoints (p1, p2) = do
     return (Point x y)
 
 lineSegmentsFromConsecutivePoints :: [Point] -> [LineSegment]
-lineSegmentsFromConsecutivePoints points = zip points (rotate points)
-    where rotate arr = tail arr ++ [head arr]
+lineSegmentsFromConsecutivePoints points = zip points (tail points ++ [head points])
 
 type Row = Int
 
@@ -78,10 +77,10 @@ verticalPointsForRayTracing (p1, p2) =
         then [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
         else []
 
-pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
-pointInsideShape point shape borderPoints = 
-    Set.member point borderPoints || isPointInEncodedShape
-    where isPointInEncodedShape =
+isPointInsidePolygon :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
+isPointInsidePolygon point polygonEncoded polygonBorderPoints =
+    Set.member point polygonBorderPoints || isPointInEncodedPolygon
+    where isPointInEncodedPolygon =
             maybe 
             False 
             (\column -> 
@@ -89,20 +88,20 @@ pointInsideShape point shape borderPoints =
                 & takeWhile (> y point)
                 & length
                 & odd)
-            (Map.lookup (x point) shape)
+            (Map.lookup (x point) polygonEncoded)
 
 part2 :: [Point] -> Maybe Rect
-part2 input =
+part2 points =
     rects
-    & filter (all (\p -> pointInsideShape p encodedShape shapeBorder) . cornerPointsInRect)
-    & find (all (\p -> pointInsideShape p encodedShape shapeBorder) . borderPointsInRect)
+    & filter (all (\p -> isPointInsidePolygon p polygonEncoded polygonBorderPoints) . cornerPointsInRect)
+    & find (all (\p -> isPointInsidePolygon p polygonEncoded polygonBorderPoints) . borderPointsInRect)
     where
         rects = 
-            [[p1, p2] | p1 <- input, p2 <- input, p1 < p2]
+            [[p1, p2] | p1 <- points, p2 <- points, p1 < p2]
             & map makeRect
             & sortBy (comparing Down)
-        encodedShape =
-            input
+        polygonEncoded =
+            points
             & lineSegmentsFromConsecutivePoints
             & concatMap verticalPointsForRayTracing
             & sort
@@ -113,8 +112,8 @@ part2 input =
                 else (x point, [y point]) : memo) 
             [(0,[])]
             & Map.fromList
-        shapeBorder = 
-            input
+        polygonBorderPoints = 
+            points
             & lineSegmentsFromConsecutivePoints 
             & concatMap intermediaryPoints
             & Set.fromList
