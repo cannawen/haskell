@@ -128,6 +128,4 @@ pointInsideShape p encodedShape borderPoints =
 
 main = do
     contents <- readFile "app/aoc/2025/9/input.txt"
-    -- writeFile "app/aoc/2025/9.3/output.txt" (show $ part2Saving $ parse contents)
-    savedShape <- readFile "app/aoc/2025/9.3/output.txt"
-    print $ size <$> part2 (read savedShape :: EncodedShape) (parse contents)
+    print $ size <$> part2 (part2Saving $ parse contents) (parse contents)
