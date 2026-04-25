@@ -101,7 +101,7 @@ shapePoints shape = Set.unions (map (Set.fromList . intermediaryPointsFromSegmen
 
 -- Part 2 (code to save encoded shape) ----------------------------------------------------------------------------------------------------------------
 
-part2Saving points = encode shapePointsVertical xBounds
+encodedShape points = encode shapePointsVertical xBounds
     where
         xBounds = points & map x & maximum & succ
         shape = lineSegmentsFromCornerPoints points
@@ -109,11 +109,12 @@ part2Saving points = encode shapePointsVertical xBounds
 
 -- Part 2 ----------------------------------------------------------------------------------------------------------------
 
-part2 shape input =
+part2 input =
     filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rect
     & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
     where
         rect = part1 input
+        shape = encodedShape input
         shapeBorder = shapePoints (lineSegmentsFromCornerPoints input)
 
 isPointInEncodedShape :: Point -> EncodedShape -> Bool
@@ -128,4 +129,4 @@ pointInsideShape p encodedShape borderPoints =
 
 main = do
     contents <- readFile "app/aoc/2025/9/input.txt"
-    print $ size <$> part2 (part2Saving $ parse contents) (parse contents)
+    print $ size <$> part2 (parse contents)
