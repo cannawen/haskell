@@ -77,17 +77,7 @@ type Column = Int
 type EncodedShape = Map.Map Row [Column]
 
 encode :: Set.Set Point -> Int -> EncodedShape
--- encode shapeV xBound = Map.fromList [(xi, map y (Set.toList (Set.filter (\p -> x p == xi) shapeV))) |  xi <- [0 .. xBound]]
-encode shapeV xBound = 
-    Set.toList shapeV 
-    & sort 
-    & foldl' 
-      (\m p -> 
-          if fst (head m) == x p 
-          then (x p, x y : snd (head m)) : tail memo 
-          else (x p, [y p]) : memo) 
-      [(0,[])]
-    & Map.fromList
+encode shapeV xBound = Map.fromList [(xi, map y (Set.toList (Set.filter (\p -> x p == xi) shapeV))) |  xi <- [0 .. xBound]]
 
 intermediaryPointsFromSegment:: LineSegment -> [Point]
 intermediaryPointsFromSegment (p1, p2) =
@@ -133,7 +123,7 @@ isPointInEncodedShape :: Point -> EncodedShape -> Bool
 isPointInEncodedShape p s =
     case Map.lookup (x p) s of
     Nothing -> False
-    Just columns -> odd $ length (takeWhile (> y p) columns)
+    Just columns -> odd $ length (takeWhile (< y p) columns)
 
 pointInsideShape :: Point -> EncodedShape -> Set.Set Point -> Bool
 pointInsideShape p encodedShape borderPoints =
