@@ -32,14 +32,14 @@ instance Ord Rect where
 size :: Rect -> Int
 size rect = succ (xMax rect - xMin rect) * succ (yMax rect - yMin rect)
 
-makeRect :: Point -> Point -> Rect
-makeRect p1 p2 =
+makeRect :: [Point] -> Rect
+makeRect pts =
     Rect 
     {
-        xMin = min (x p1) (x p2),
-        yMin = min (y p1) (y p2),
-        xMax = max (x p1) (x p2),
-        yMax = max (y p1) (y p2)
+        xMin = map x pts & minimum, 
+        yMin = map y pts & minimum,
+        xMax = map x pts & maximum,
+        yMax = map y pts & maximum
     }
 
 cornerPointsInRect :: Rect -> [Point]
@@ -64,76 +64,60 @@ intermediaryPoints (p1, p2) = do
     y <- [min (y p1) (y p2) .. max (y p1) (y p2)]
     return (Point x y)
 
+lineSegmentsFromConsecutivePoints :: [Point] -> [LineSegment]
+lineSegmentsFromConsecutivePoints points = zip points (rotate points)
+    where rotate arr = tail arr ++ [head arr]
+
+type Row = Int
+
+type Column = Int
+
 verticalPointsForRayTracing :: LineSegment -> [Point]
 verticalPointsForRayTracing (p1, p2) =
     if isVertical (p1, p2)
         then [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
         else []
 
-lineSegmentsFromConsecutivePoints :: [Point] -> [LineSegment]
-lineSegmentsFromConsecutivePoints points = zip points (rotate points)
-    where rotate arr = tail arr ++ [head arr]
-
-sortedRects :: [Point] -> [Rect]
-sortedRects points =
-    [(p1, p2) | p1 <- points, p2 <- points, p1 < p2]
-    & map (uncurry makeRect)
-    & sortBy (comparing Down)
-
-type Row = Int
-
-type Column = Int
-
-encodedShape :: [Point] -> Map.Map Row [Column]
-encodedShape points = 
-    points
-    & lineSegmentsFromConsecutivePoints
-    & concatMap verticalPointsForRayTracing
-    & encode
-
-encode :: [Point] -> Map.Map Row [Column]
-encode shapeV = 
-    shapeV
-    & sort 
-    & foldl' 
-      (\memo point ->
-          if fst (head memo) == x point
-          then (x point, y point : snd (head memo)) : tail memo
-          else (x point, [y point]) : memo) 
-      [(0,[])]
-    & Map.fromList
-
-shapePoints :: [LineSegment] -> Set.Set Point
-shapePoints shape = 
-    shape 
-    & concatMap intermediaryPoints
-    & Set.fromList
-
-isPointInEncodedShape :: Point -> Map.Map Row [Column] -> Bool
-isPointInEncodedShape point shape =
-    maybe 
-    False 
-    (\column -> 
-        column
-        & takeWhile (> y point)
-        & length
-        & odd)
-    (Map.lookup (x point) shape)
-
 pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
-pointInsideShape p encodedShape borderPoints = 
-    Set.member p borderPoints 
-    || isPointInEncodedShape p encodedShape
+pointInsideShape point shape borderPoints = 
+    Set.member point borderPoints || isPointInEncodedShape
+    where isPointInEncodedShape =
+            maybe 
+            False 
+            (\column -> 
+                column
+                & takeWhile (> y point)
+                & length
+                & odd)
+            (Map.lookup (x point) shape)
 
 part2 :: [Point] -> Maybe Rect
 part2 input =
     rects
-    & filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect)
-    & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
+    & filter (all (\p -> pointInsideShape p encodedShape shapeBorder) . cornerPointsInRect)
+    & find (all (\p -> pointInsideShape p encodedShape shapeBorder) . borderPointsInRect)
     where
-        rects = sortedRects input
-        shape = encodedShape input
-        shapeBorder = shapePoints (lineSegmentsFromConsecutivePoints input)
+        rects = 
+            [[p1, p2] | p1 <- input, p2 <- input, p1 < p2]
+            & map makeRect
+            & sortBy (comparing Down)
+        encodedShape =
+            input
+            & lineSegmentsFromConsecutivePoints
+            & concatMap verticalPointsForRayTracing
+            & sort
+            & foldl' 
+            (\memo point ->
+                if fst (head memo) == x point
+                then (x point, y point : snd (head memo)) : tail memo
+                else (x point, [y point]) : memo) 
+            [(0,[])]
+            & Map.fromList
+        shapeBorder = 
+            input
+            & lineSegmentsFromConsecutivePoints 
+            & concatMap intermediaryPoints
+            & Set.fromList
 
 parse :: String -> [Point]
 parse input =
