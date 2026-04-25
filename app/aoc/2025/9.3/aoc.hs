@@ -53,18 +53,22 @@ cornerPointsInRect rect =
 
 borderPointsInRect :: Rect -> [Point]
 borderPointsInRect rect =
-    cornerPointsInRect rect
+    rect
+    & cornerPointsInRect
     & lineSegmentsFromConsecutivePoints
-    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
+    & concatMap intermediaryPoints
 
-intermediaryPointsIgnoringBottomPointOfVerticalSegments :: LineSegment -> [Point]
-intermediaryPointsIgnoringBottomPointOfVerticalSegments (p1, p2) =
+intermediaryPoints :: LineSegment -> [Point]
+intermediaryPoints (p1, p2) = do
+    x <- [min (x p1) (x p2) .. max (x p1) (x p2)]
+    y <- [min (y p1) (y p2) .. max (y p1) (y p2)]
+    return (Point x y)
+
+verticalPointsForRayTracing :: LineSegment -> [Point]
+verticalPointsForRayTracing (p1, p2) =
     if isVertical (p1, p2)
         then [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
-        -- This pred thing is kinda weird, but needed for ray tracing
-        -- We are using this function for other stuff as well though, it just happens to work out by chance.
-        -- Maybe break up the ray tracing function into its own thing so we have a less obnoxious name
-        else [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
+        else []
 
 lineSegmentsFromConsecutivePoints :: [Point] -> [LineSegment]
 lineSegmentsFromConsecutivePoints points = zip points (rotate points)
@@ -84,8 +88,7 @@ encodedShape :: [Point] -> Map.Map Row [Column]
 encodedShape points = 
     points
     & lineSegmentsFromConsecutivePoints
-    & filter isVertical
-    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
+    & concatMap verticalPointsForRayTracing
     & encode
 
 encode :: [Point] -> Map.Map Row [Column]
@@ -103,7 +106,7 @@ encode shapeV =
 shapePoints :: [LineSegment] -> Set.Set Point
 shapePoints shape = 
     shape 
-    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
+    & concatMap intermediaryPoints
     & Set.fromList
 
 isPointInEncodedShape :: Point -> Map.Map Row [Column] -> Bool
@@ -118,12 +121,14 @@ isPointInEncodedShape point shape =
     (Map.lookup (x point) shape)
 
 pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
-pointInsideShape p encodedShape borderPoints =
-    Set.member p borderPoints || isPointInEncodedShape p encodedShape
+pointInsideShape p encodedShape borderPoints = 
+    Set.member p borderPoints 
+    || isPointInEncodedShape p encodedShape
 
 part2 :: [Point] -> Maybe Rect
 part2 input =
-    filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rects
+    rects
+    & filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect)
     & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
     where
         rects = sortedRects input
