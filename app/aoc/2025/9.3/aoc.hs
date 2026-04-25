@@ -62,9 +62,8 @@ borderPointsInRect s =
 
 type Row = Int
 type Column = Int
-type EncodedShape = Map.Map Row [Column]
 
-encode :: Set.Set Point -> Int -> EncodedShape
+encode :: Set.Set Point -> Int -> Map.Map Row [Column]
 encode shapeV xBound = 
     Set.toList shapeV 
     & sort 
@@ -117,13 +116,13 @@ part2 input =
         shape = encodedShape input
         shapeBorder = shapePoints (lineSegmentsFromCornerPoints input)
 
-isPointInEncodedShape :: Point -> EncodedShape -> Bool
+isPointInEncodedShape :: Point -> Map.Map Row [Column] -> Bool
 isPointInEncodedShape p s =
     case Map.lookup (x p) s of
     Nothing -> False
     Just columns -> odd $ length (takeWhile (> y p) columns)
 
-pointInsideShape :: Point -> EncodedShape -> Set.Set Point -> Bool
+pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
 pointInsideShape p encodedShape borderPoints =
     Set.member p borderPoints || isPointInEncodedShape p encodedShape
 
