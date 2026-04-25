@@ -1,4 +1,3 @@
-
 import Data.Function ( (&) )
 import Data.List.Split ( splitOn )
 import Data.List ( foldl', find, sort, sortBy )
@@ -6,12 +5,11 @@ import Data.Ord ( comparing, Down(Down) )
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
--- TODO : nail down domain-specific terms and use consistently throughout the program.
--- Too many things referred to as "shape"
-
-data Point = Point
-    { x :: Int
-    , y :: Int
+data Point = 
+    Point
+    { 
+        x :: Int, 
+        y :: Int
     } deriving (Eq, Ord)
 
 type LineSegment = (Point, Point)
@@ -19,22 +17,25 @@ type LineSegment = (Point, Point)
 isVertical :: LineSegment -> Bool
 isVertical (p1, p2) = y p1 == y p2
 
-data Rect = Rect
-    { xMin :: Int
-    , yMin :: Int
-    , xMax :: Int
-    , yMax :: Int
+data Rect = 
+    Rect
+    { 
+        xMin :: Int, 
+        yMin :: Int, 
+        xMax :: Int, 
+        yMax :: Int
     } deriving (Eq, Show)
 
 instance Ord Rect where
     compare = comparing size
 
 size :: Rect -> Int
-size s = succ (xMax s - xMin s) * succ (yMax s - yMin s)
+size rect = succ (xMax rect - xMin rect) * succ (yMax rect - yMin rect)
 
 makeRect :: Point -> Point -> Rect
 makeRect p1 p2 =
-    Rect {
+    Rect 
+    {
         xMin = min (x p1) (x p2),
         yMin = min (y p1) (y p2),
         xMax = max (x p1) (x p2),
@@ -42,42 +43,36 @@ makeRect p1 p2 =
     }
 
 cornerPointsInRect :: Rect -> [Point]
-cornerPointsInRect s =
+cornerPointsInRect rect =
     [
-        Point (xMin s) (yMin s),
-        Point (xMin s) (yMax s),
-        Point (xMax s) (yMax s),
-        Point (xMax s) (yMin s)
+        Point (xMin rect) (yMin rect),
+        Point (xMin rect) (yMax rect),
+        Point (xMax rect) (yMax rect),
+        Point (xMax rect) (yMin rect)
     ]
 
 borderPointsInRect :: Rect -> [Point]
-borderPointsInRect s =
-    [
-        Point (xMin s) (yMin s), 
-        Point (xMin s) (yMax s), 
-        Point (xMax s) (yMax s), 
-        Point (xMax s) (yMin s)
-    ]
-    & lineSegmentsFromCornerPoints
-    & concatMap intermediaryPointsFromSegment
+borderPointsInRect rect =
+    cornerPointsInRect rect
+    & lineSegmentsFromConsecutivePoints
+    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
 
-intermediaryPointsFromSegment :: LineSegment -> [Point]
-intermediaryPointsFromSegment (p1, p2) =
+intermediaryPointsIgnoringBottomPointOfVerticalSegments :: LineSegment -> [Point]
+intermediaryPointsIgnoringBottomPointOfVerticalSegments (p1, p2) =
     if isVertical (p1, p2)
         then [Point x (y p1) | x <- [min (x p1) (x p2) .. max (x p1) (x p2) & pred]]
         -- This pred thing is kinda weird, but needed for ray tracing
-        -- I don't love that the function name doesn't signify this
-        -- and we are using the fn in a lot of places - it just happens to work out.
-        -- TODO
+        -- We are using this function for other stuff as well though, it just happens to work out by chance.
+        -- Maybe break up the ray tracing function into its own thing so we have a less obnoxious name
         else [Point (x p1) y | y <- [min (y p1) (y p2) .. max (y p1) (y p2)]]
 
-lineSegmentsFromCornerPoints :: [Point] -> [LineSegment]
-lineSegmentsFromCornerPoints points = zip points (rotate points)
+lineSegmentsFromConsecutivePoints :: [Point] -> [LineSegment]
+lineSegmentsFromConsecutivePoints points = zip points (rotate points)
     where rotate arr = tail arr ++ [head arr]
 
 sortedRects :: [Point] -> [Rect]
-sortedRects input =
-    [(p1, p2) | p1 <- input, p2 <- input, p1 < p2]
+sortedRects points =
+    [(p1, p2) | p1 <- points, p2 <- points, p1 < p2]
     & map (uncurry makeRect)
     & sortBy (comparing Down)
 
@@ -86,32 +81,41 @@ type Row = Int
 type Column = Int
 
 encodedShape :: [Point] -> Map.Map Row [Column]
-encodedShape points = encode shapePointsVertical xBounds
-    where
-        xBounds = points & map x & maximum & succ
-        shape = lineSegmentsFromCornerPoints points
-        shapePointsVertical = Set.unions (map (Set.fromList . intermediaryPointsFromSegment) (filter isVertical shape))
+encodedShape points = 
+    points
+    & lineSegmentsFromConsecutivePoints
+    & filter isVertical
+    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
+    & encode
 
-encode :: Set.Set Point -> Int -> Map.Map Row [Column]
-encode shapeV xBound = 
-    Set.toList shapeV 
+encode :: [Point] -> Map.Map Row [Column]
+encode shapeV = 
+    shapeV
     & sort 
     & foldl' 
-      (\m p -> 
-          if fst (head m) == x p 
-          then (x p, y p : snd (head m)) : tail m 
-          else (x p, [y p]) : m) 
+      (\memo point ->
+          if fst (head memo) == x point
+          then (x point, y point : snd (head memo)) : tail memo
+          else (x point, [y point]) : memo) 
       [(0,[])]
     & Map.fromList
 
 shapePoints :: [LineSegment] -> Set.Set Point
-shapePoints shape = Set.unions (map (Set.fromList . intermediaryPointsFromSegment) shape)
+shapePoints shape = 
+    shape 
+    & concatMap intermediaryPointsIgnoringBottomPointOfVerticalSegments
+    & Set.fromList
 
 isPointInEncodedShape :: Point -> Map.Map Row [Column] -> Bool
-isPointInEncodedShape p s =
-    case Map.lookup (x p) s of
-    Nothing -> False
-    Just columns -> odd $ length (takeWhile (> y p) columns)
+isPointInEncodedShape point shape =
+    maybe 
+    False 
+    (\column -> 
+        column
+        & takeWhile (> y point)
+        & length
+        & odd)
+    (Map.lookup (x point) shape)
 
 pointInsideShape :: Point -> Map.Map Row [Column] -> Set.Set Point -> Bool
 pointInsideShape p encodedShape borderPoints =
@@ -119,12 +123,12 @@ pointInsideShape p encodedShape borderPoints =
 
 part2 :: [Point] -> Maybe Rect
 part2 input =
-    filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rect
+    filter (all (\p -> pointInsideShape p shape shapeBorder) . cornerPointsInRect) rects
     & find (all (\p -> pointInsideShape p shape shapeBorder) . borderPointsInRect)
     where
-        rect = sortedRects input
+        rects = sortedRects input
         shape = encodedShape input
-        shapeBorder = shapePoints (lineSegmentsFromCornerPoints input)
+        shapeBorder = shapePoints (lineSegmentsFromConsecutivePoints input)
 
 parse :: String -> [Point]
 parse input =
