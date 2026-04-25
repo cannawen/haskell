@@ -23,11 +23,11 @@ A point counts as "within" the polygon if one of two conditions hold:
 - Start with list of consecutive polygon points
 - Create tuples of neighbouring points, representing line segments
 - Create a set all intermediary points on the line
-- Check if point is a member of the set
+- Check if point is a member of the border set
 
 ## Ray casting
 
-Given a non-border point and an encoded polygon data structure, we want to see if the point is within the polygon.
+Given a non-border point and an encoded polygon data structure, check if the point is within the polygon.
 
 ### Calculating the encoded polygon data structure
 
@@ -40,15 +40,19 @@ Given a non-border point and an encoded polygon data structure, we want to see i
         - line segment [(3,5), (6,5)] becomes [(3,5), (4,5), (5,5)]
         - line segment [(3,70), (6,70)] becomes [(3,70), (4,70), (5,70)]
 - Encode the list of all intermediary points to a map, where: 
-    - key represents a row (x value)
-    - value is a sorted array of columns in which the polygon border crosses it (y values)
+    - key represents a row of the polygon (x value)
+    - value is a sorted array of columns (y values) in which the polygon border crosses the x value 
     - The above example would look like: { 3: [5,70], 4: [5,70], 5: [5,70] }
 
-Optimization: sort all points by x and then y values and then do a reduce over them, looking at the previous entry in the memo to see if the x has not changed we should append to an existing [y] array, or if the x has changed if we should construct a new x key in the map
+Optimization: 
+    - sort all points by x and then y values and then do a reduce over them
+    - look at the previous entry in the memo 
+        - if the x has not changed we should append to an existing [y] array
+        - if the x has changed if we should construct a new x key in the map
 
 ### Seeing if a point is within the polygon
 
-- Given (px,py) point, find map[px] of our encoded shape to get [y] of the polygon
+- Given (px,py) point, find map[px] of our encoded shape to get [y] borders of the polygon
 - See how many [y] are smaller than py. This is how many lines your ray crosses.
 - If you count an odd number: you are inside the polygon. Otherwise, you are outside.
 - Example
