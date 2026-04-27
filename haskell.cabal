@@ -129,3 +129,9 @@ executable writer
     build-depends:    mtl ^>=2.3.1, containers ^>=0.6.7, base >=4.16 && <5,
     hs-source-dirs:   app/functor/
     default-language: Haskell2010
+
+executable state
+    main-is:          state.hs
+    build-depends:    mtl ^>=2.3.1, containers ^>=0.6.7, base >=4.16 && <5,
+    hs-source-dirs:   app/functor/
+    default-language: Haskell2010
