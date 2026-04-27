@@ -1,4 +1,6 @@
 import Data.Monoid
+import Control.Monad.Writer
+
 isBigGang :: Int -> (Bool, String)
 isBigGang x = (x > 9, "Compared gang size to 9")
 
@@ -21,3 +23,15 @@ addDrink _ = ("beer", Sum 30)
 -- ("milk",Sum {getSum = 35})
 -- ("jerky", Sum 25) `applyLog` addDrink
 -- ("whisky",Sum {getSum = 124})
+
+logNumber :: Int -> Writer [String] Int
+logNumber x = writer (x, ["Got number : " ++ show x])
+
+multWithLog :: Writer [String] Int
+multWithLog = do
+    a <- logNumber 3
+    b <- logNumber 5
+    return (a*b)
+
+-- multWithLog 
+-- WriterT (Identity (15,["Got number : 3","Got number : 5"]))
