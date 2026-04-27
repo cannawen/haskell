@@ -31,7 +31,8 @@ multWithLog :: Writer [String] Int
 multWithLog = do
     a <- logNumber 3
     b <- logNumber 5
+    tell ["Gonna multiply these two"]
     return (a*b)
 
 -- multWithLog 
--- WriterT (Identity (15,["Got number : 3","Got number : 5"]))
+-- WriterT (Identity (15,["Got number : 3","Got number : 5","Gonna multiply these two"]))
