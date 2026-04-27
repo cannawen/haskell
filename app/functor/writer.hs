@@ -36,3 +36,8 @@ multWithLog = do
 
 -- multWithLog 
 -- WriterT (Identity (15,["Got number : 3","Got number : 5","Gonna multiply these two"]))
+
+gcd' :: Int -> Int -> Int
+gcd' a b
+    | b == 0 = a
+    | otherwise = gcd' b (a `mod` b)
