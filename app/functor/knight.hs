@@ -39,6 +39,15 @@ inThreeMoves = inThreeMovesC
 canReachIn3 :: Knight -> Knight -> Bool
 canReachIn3 start end = end `elem` inThreeMoves start
 
+inMany :: Int -> Knight -> [Knight]
+inMany x start = return start >>= foldr (<=<) return (replicate x move)
+
+canReachIn :: Int -> Knight -> Knight -> Bool
+canReachIn x start end = end `elem` inMany x start
+
 main = do
     print $ canReachIn3 (5,1) (5,0)
+    print $ canReachIn 3 (5,1) (5,0)
     print $ canReachIn3 (5,1) (6,2)
+    print $ canReachIn 3 (5,1) (6,2)
+
