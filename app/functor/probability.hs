@@ -1,6 +1,6 @@
-{-# LANGUAGE InstanceSigs #-}
 import Data.Ratio
 import Control.Monad
+import Data.List (all)
 
 newtype Prob a = Prob {getProb :: [(a, Rational)]} deriving Show
 
@@ -15,10 +15,8 @@ instance Applicative Prob where
 
 instance Monad Prob where
     return = pure
-    (>>=) :: Prob a -> (a -> Prob b) -> Prob b
     (Prob xs) >>= f = 
         flatten $ Prob [(f x, p) | (x, p) <- xs]
-
 
 flatten :: Prob (Prob a) -> Prob a
 flatten (Prob xs) = Prob [(x, p*p') | (Prob inner, p) <- xs, (x, p') <- inner]
@@ -30,5 +28,20 @@ twoCoins = do
     c2 <- coin
     return (c1, c2)
 
+data Coin = Heads | Tails deriving (Show, Eq)
+
+coin' :: Prob Coin
+coin' = Prob [(Heads, 1%2), (Tails, 1%2)]
+
+loadedCoin :: Prob Coin
+loadedCoin = Prob [(Heads, 1%10), (Tails, 9%10)]
+
+flipThree :: Prob Bool
+flipThree = do
+    a <- coin'
+    b <- coin'
+    c <- loadedCoin
+    return (all (==Tails) [a,b,c])
+
 main = do 
-    print twoCoins
+    print flipThree
