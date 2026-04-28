@@ -1,5 +1,7 @@
 import Control.Monad.State
 import System.Random
+import Control.Monad.Writer
+import Control.Monad (filterM)
 
 
 type Stack = [Int]
@@ -63,3 +65,18 @@ threeCoins = do
     b <- randomSt
     c <- randomSt
     return (a,b,c)
+
+x = filter (< 4) [9, 1, 5, 2, 10, 3]
+
+keepSmall :: Int -> Writer [String] Bool
+keepSmall y
+    | y < 4 = do 
+        tell ["Keeping " ++ show y]
+        return True
+    | otherwise = do 
+        tell [show y ++ " is too large"]
+        return False
+
+z = runWriter $ filterM keepSmall [9, 1, 5, 2, 10, 3]
+
+powerset xs = filterM (\x -> [True, False]) xs
